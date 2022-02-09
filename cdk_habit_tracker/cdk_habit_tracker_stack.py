@@ -6,8 +6,7 @@ from aws_cdk import (
     aws_sns as sns,
     aws_sns_subscriptions as subscriptions,
     aws_iam as iam,
-    aws_apigateway as apigateway,
-    Aws
+    aws_apigateway as apigateway
 )
 from constructs import Construct
 
@@ -75,22 +74,26 @@ class CdkHabitTrackerStack(Stack):
             deploy_options=apigateway.StageOptions(
                 logging_level=apigateway.MethodLoggingLevel.INFO,
                 data_trace_enabled=True
+            ),
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=apigateway.Cors.ALL_METHODS
             )
         )
 
         habit_resource = api.root.add_resource('habit')
+        habit_data_resource = api.root.add_resource(
+            'habit-data',
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=["GET", "POST"]
+            )
+        )
+
         create_habit_credentials_role = iam.Role(
             self, 'cdk-create-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        # create_habit_policy = iam.Policy(
-        #     self, 'cdk-create-habit-apig-ddb-policy',
-        #     statements=[iam.PolicyStatement(
-        #         actions=['dynamodb:PutItem'],
-        #         resources=[ddb_table.table_arn]
-        #     )]
-        # )
-        # create_habit_credentials_role.attach_inline_policy(create_habit_policy)
         ddb_table.grant_write_data(create_habit_credentials_role)
         habit_resource.add_method(
             'POST',
@@ -101,7 +104,6 @@ class CdkHabitTrackerStack(Stack):
                 options=apigateway.IntegrationOptions(
                     credentials_role=create_habit_credentials_role,
                     request_templates={
-                        #'application/json': f"""{{"Item": {{"PK1": {{"S": "$input.path('$.PK1')"}},"SK1": {{"S": "$input.path('$.SK1')"}}, "PK2":{{"S": "$input.path('$.PK2')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
                         'application/json': f'{{"Item": $input.body, "TableName": "{ddb_table.table_name}"}}'
                     },
                     integration_responses=[
@@ -116,14 +118,6 @@ class CdkHabitTrackerStack(Stack):
             self, 'cdk-delete-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        # delete_habit_policy = iam.Policy(
-        #     self, 'cdk-delete-habit-apig-ddb-policy',
-        #     statements=[iam.PolicyStatement(
-        #         actions=['dynamodb:DeleteItem'],
-        #         resources=[ddb_table.table_arn]
-        #     )]
-        # )
-        # delete_habit_credentials_role.attach_inline_policy(delete_habit_policy)
         ddb_table.grant_full_access(delete_habit_credentials_role)
         habit_resource.add_method(
             'DELETE',
@@ -148,14 +142,6 @@ class CdkHabitTrackerStack(Stack):
             self, 'cdk-update-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        # update_habit_policy = iam.Policy(
-        #     self, 'cdk-update-habit-apig-ddb-policy',
-        #     statements=[iam.PolicyStatement(
-        #         actions=['dynamodb:UpdateItem'],
-        #         resources=[ddb_table.table_arn]
-        #     )]
-        # )
-        # update_habit_credentials_role.attach_inline_policy(update_habit_policy)
         ddb_table.grant_write_data(update_habit_credentials_role)
         habit_resource.add_method(
             'PUT',
@@ -180,16 +166,7 @@ class CdkHabitTrackerStack(Stack):
             self, 'cdk-read-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        # read_habit_policy = iam.Policy(
-        #     self, 'cdk-read-habit-apig-ddb-policy',
-        #     statements=[iam.PolicyStatement(
-        #         actions=['dynamodb:GetItem'],
-        #         resources=[ddb_table.table_arn]
-        #     )]
-        # )
         ddb_table.grant_read_data(read_habit_credentials_role)
-        # read_habit_credentials_role.attach_inline_policy(read_habit_policy)
-        # curl GET https://[API_PATH].execute-api.us-east-1.amazonaws.com/prod/habit/?PK1=read-a-book-for-10m&SK1=DAILY
         habit_resource.add_method(
             'GET',
             integration=apigateway.AwsIntegration(
@@ -199,7 +176,7 @@ class CdkHabitTrackerStack(Stack):
                 options=apigateway.IntegrationOptions(
                     credentials_role=read_habit_credentials_role,
                     request_templates={
-                        'application/json': f"""{{"Key": {{"PK1":{{"S":"HABIT#$input.params('PK1')"}},"SK1":{{"S":"FREQUENCY#$input.params('SK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                        'application/json': f"""{{"Key": {{"PK1":{{"S":"HABIT#$input.params('PK1')"}},"SK1":{{"S":"HABIT#$input.params('SK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
                     },
                     integration_responses=[
                         apigateway.IntegrationResponse(status_code='200')
@@ -207,4 +184,35 @@ class CdkHabitTrackerStack(Stack):
                 )
             ),
             method_responses=[apigateway.MethodResponse(status_code='200')]
+        )
+
+        query_habit_data_credentials_role = iam.Role(
+            self, 'cdk-query-habit-data-apig-ddb-role',
+            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
+        )
+        ddb_table.grant_read_data(query_habit_data_credentials_role)
+        habit_data_resource.add_method(
+            'GET',
+            integration=apigateway.AwsIntegration(
+                service='dynamodb',
+                action='Query',
+                integration_http_method='POST',
+                options=apigateway.IntegrationOptions(
+                    credentials_role=query_habit_data_credentials_role,
+                    request_templates={
+                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"HABIT#$input.params('PK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                    },
+                    integration_responses=[
+                        apigateway.IntegrationResponse(
+                            status_code='200',
+                            response_parameters={'method.response.header.Access-Control-Allow-Origin': "'*'"}
+                        )
+                    ],
+                )
+            ),
+            method_responses=[apigateway.MethodResponse(
+                    status_code='200',
+                    response_parameters={'method.response.header.Access-Control-Allow-Origin': True}
+                )
+            ]
         )

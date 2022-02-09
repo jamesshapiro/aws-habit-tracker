@@ -10,3 +10,5 @@ __pycache__
 cdk.out
 curl-test.txt
 curl-test-*
+habit-data-test.txt
+add_blank_data.py
