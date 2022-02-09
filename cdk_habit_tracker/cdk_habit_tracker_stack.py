@@ -83,14 +83,15 @@ class CdkHabitTrackerStack(Stack):
             self, 'cdk-create-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        create_habit_policy = iam.Policy(
-            self, 'cdk-create-habit-apig-ddb-policy',
-            statements=[iam.PolicyStatement(
-                actions=['dynamodb:PutItem'],
-                resources=[ddb_table.table_arn]
-            )]
-        )
-        create_habit_credentials_role.attach_inline_policy(create_habit_policy)
+        # create_habit_policy = iam.Policy(
+        #     self, 'cdk-create-habit-apig-ddb-policy',
+        #     statements=[iam.PolicyStatement(
+        #         actions=['dynamodb:PutItem'],
+        #         resources=[ddb_table.table_arn]
+        #     )]
+        # )
+        # create_habit_credentials_role.attach_inline_policy(create_habit_policy)
+        ddb_table.grant_write_data(create_habit_credentials_role)
         habit_resource.add_method(
             'POST',
             integration=apigateway.AwsIntegration(
@@ -111,19 +112,19 @@ class CdkHabitTrackerStack(Stack):
             method_responses=[apigateway.MethodResponse(status_code='200')]
         )
 
-
         delete_habit_credentials_role = iam.Role(
             self, 'cdk-delete-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        delete_habit_policy = iam.Policy(
-            self, 'cdk-delete-habit-apig-ddb-policy',
-            statements=[iam.PolicyStatement(
-                actions=['dynamodb:DeleteItem'],
-                resources=[ddb_table.table_arn]
-            )]
-        )
-        delete_habit_credentials_role.attach_inline_policy(delete_habit_policy)
+        # delete_habit_policy = iam.Policy(
+        #     self, 'cdk-delete-habit-apig-ddb-policy',
+        #     statements=[iam.PolicyStatement(
+        #         actions=['dynamodb:DeleteItem'],
+        #         resources=[ddb_table.table_arn]
+        #     )]
+        # )
+        # delete_habit_credentials_role.attach_inline_policy(delete_habit_policy)
+        ddb_table.grant_full_access(delete_habit_credentials_role)
         habit_resource.add_method(
             'DELETE',
             integration=apigateway.AwsIntegration(
@@ -143,23 +144,19 @@ class CdkHabitTrackerStack(Stack):
             method_responses=[apigateway.MethodResponse(status_code='200')]
         )
 
-
-
-
-
-
         update_habit_credentials_role = iam.Role(
             self, 'cdk-update-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        update_habit_policy = iam.Policy(
-            self, 'cdk-update-habit-apig-ddb-policy',
-            statements=[iam.PolicyStatement(
-                actions=['dynamodb:UpdateItem'],
-                resources=[ddb_table.table_arn]
-            )]
-        )
-        update_habit_credentials_role.attach_inline_policy(update_habit_policy)
+        # update_habit_policy = iam.Policy(
+        #     self, 'cdk-update-habit-apig-ddb-policy',
+        #     statements=[iam.PolicyStatement(
+        #         actions=['dynamodb:UpdateItem'],
+        #         resources=[ddb_table.table_arn]
+        #     )]
+        # )
+        # update_habit_credentials_role.attach_inline_policy(update_habit_policy)
+        ddb_table.grant_write_data(update_habit_credentials_role)
         habit_resource.add_method(
             'PUT',
             integration=apigateway.AwsIntegration(
@@ -179,21 +176,19 @@ class CdkHabitTrackerStack(Stack):
             method_responses=[apigateway.MethodResponse(status_code='200')]
         )
 
-
-
-
         read_habit_credentials_role = iam.Role(
             self, 'cdk-read-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
-        read_habit_policy = iam.Policy(
-            self, 'cdk-read-habit-apig-ddb-policy',
-            statements=[iam.PolicyStatement(
-                actions=['dynamodb:GetItem'],
-                resources=[ddb_table.table_arn]
-            )]
-        )
-        read_habit_credentials_role.attach_inline_policy(read_habit_policy)
+        # read_habit_policy = iam.Policy(
+        #     self, 'cdk-read-habit-apig-ddb-policy',
+        #     statements=[iam.PolicyStatement(
+        #         actions=['dynamodb:GetItem'],
+        #         resources=[ddb_table.table_arn]
+        #     )]
+        # )
+        ddb_table.grant_read_data(read_habit_credentials_role)
+        # read_habit_credentials_role.attach_inline_policy(read_habit_policy)
         # curl GET https://[API_PATH].execute-api.us-east-1.amazonaws.com/prod/habit/?PK1=read-a-book-for-10m&SK1=DAILY
         habit_resource.add_method(
             'GET',
