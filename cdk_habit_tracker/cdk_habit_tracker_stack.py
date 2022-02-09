@@ -100,7 +100,8 @@ class CdkHabitTrackerStack(Stack):
                 options=apigateway.IntegrationOptions(
                     credentials_role=create_habit_credentials_role,
                     request_templates={
-                        'application/json': f"""{{"Item": {{"PK1": {{"S": "$input.path('$.PK1')"}},"SK1": {{"S": "$input.path('$.SK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                        #'application/json': f"""{{"Item": {{"PK1": {{"S": "$input.path('$.PK1')"}},"SK1": {{"S": "$input.path('$.SK1')"}}, "PK2":{{"S": "$input.path('$.PK2')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                        'application/json': f'{{"Item": $input.body, "TableName": "{ddb_table.table_name}"}}'
                     },
                     integration_responses=[
                         apigateway.IntegrationResponse(status_code='200')
@@ -132,7 +133,7 @@ class CdkHabitTrackerStack(Stack):
                 options=apigateway.IntegrationOptions(
                     credentials_role=delete_habit_credentials_role,
                     request_templates={
-                        'application/json': f"""{{"Key": {{"PK1": {{"S": "$input.path('$.PK1')"}},"SK1": {{"S": "$input.path('$.SK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                        'application/json': f'{{"Key": $input.body, "TableName": "{ddb_table.table_name}"}}'
                     },
                     integration_responses=[
                         apigateway.IntegrationResponse(status_code='200')
@@ -147,33 +148,68 @@ class CdkHabitTrackerStack(Stack):
 
 
 
-        # update_habit_credentials_role = iam.Role(
-        #     self, 'cdk-update-habit-apig-ddb-role',
-        #     assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
-        # )
-        # update_habit_policy = iam.Policy(
-        #     self, 'cdk-update-habit-apig-ddb-policy',
-        #     statements=[iam.PolicyStatement(
-        #         actions=['dynamodb:UpdateItem'],
-        #         resources=[ddb_table.table_arn]
-        #     )]
-        # )
-        # update_habit_credentials_role.attach_inline_policy(update_habit_policy)
-        # habit_resource.add_method(
-        #     'PUT',
-        #     integration=apigateway.AwsIntegration(
-        #         service='dynamodb',
-        #         action='UpdateItem',
-        #         integration_http_method='POST',
-        #         options=apigateway.IntegrationOptions(
-        #             credentials_role=update_habit_credentials_role,
-        #             request_templates={
-        #                 'application/json': f"""{{"Key": {{"PK1": {{"S": "$input.path('$.PK1')"}},"SK1": {{"S": "$input.path('$.SK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
-        #             },
-        #             integration_responses=[
-        #                 apigateway.IntegrationResponse(status_code='200')
-        #             ],
-        #         )
-        #     ),
-        #     method_responses=[apigateway.MethodResponse(status_code='200')]
-        # )
+        update_habit_credentials_role = iam.Role(
+            self, 'cdk-update-habit-apig-ddb-role',
+            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
+        )
+        update_habit_policy = iam.Policy(
+            self, 'cdk-update-habit-apig-ddb-policy',
+            statements=[iam.PolicyStatement(
+                actions=['dynamodb:UpdateItem'],
+                resources=[ddb_table.table_arn]
+            )]
+        )
+        update_habit_credentials_role.attach_inline_policy(update_habit_policy)
+        habit_resource.add_method(
+            'PUT',
+            integration=apigateway.AwsIntegration(
+                service='dynamodb',
+                action='UpdateItem',
+                integration_http_method='POST',
+                options=apigateway.IntegrationOptions(
+                    credentials_role=update_habit_credentials_role,
+                    request_templates={
+                        'application/json': f"""{{"Key": {{"PK1": {{"S": "$input.path('$.PK1.S')"}},"SK1": {{"S": "$input.path('$.SK1.S')"}}}}, "ExpressionAttributeNames":{{"#pk2":"PK2"}},"ExpressionAttributeValues":{{":pk2":{{"S":"$input.path('$.PK2.S')"}}}},"UpdateExpression": "SET #pk2 = :pk2","TableName": "{ddb_table.table_name}"}}"""
+                    },
+                    integration_responses=[
+                        apigateway.IntegrationResponse(status_code='200')
+                    ],
+                )
+            ),
+            method_responses=[apigateway.MethodResponse(status_code='200')]
+        )
+
+
+
+
+        read_habit_credentials_role = iam.Role(
+            self, 'cdk-read-habit-apig-ddb-role',
+            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
+        )
+        read_habit_policy = iam.Policy(
+            self, 'cdk-read-habit-apig-ddb-policy',
+            statements=[iam.PolicyStatement(
+                actions=['dynamodb:GetItem'],
+                resources=[ddb_table.table_arn]
+            )]
+        )
+        read_habit_credentials_role.attach_inline_policy(read_habit_policy)
+        # curl GET https://[API_PATH].execute-api.us-east-1.amazonaws.com/prod/habit/?PK1=read-a-book-for-10m&SK1=DAILY
+        habit_resource.add_method(
+            'GET',
+            integration=apigateway.AwsIntegration(
+                service='dynamodb',
+                action='GetItem',
+                integration_http_method='POST',
+                options=apigateway.IntegrationOptions(
+                    credentials_role=read_habit_credentials_role,
+                    request_templates={
+                        'application/json': f"""{{"Key": {{"PK1":{{"S":"HABIT#$input.params('PK1')"}},"SK1":{{"S":"FREQUENCY#$input.params('SK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                    },
+                    integration_responses=[
+                        apigateway.IntegrationResponse(status_code='200')
+                    ],
+                )
+            ),
+            method_responses=[apigateway.MethodResponse(status_code='200')]
+        )
