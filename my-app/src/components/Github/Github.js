@@ -59,6 +59,7 @@ class Github extends Component {
             <GitHubCalendar
               username="jamesshapiro"
               transformData={this.selectLastDays}
+              showWeekdayLabels={true}
               hideTotalCount
               // hideColorLegend
             ></GitHubCalendar>

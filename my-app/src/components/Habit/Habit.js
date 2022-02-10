@@ -58,6 +58,7 @@ class Habit extends Component {
               data={this.state.dataPoints}
               hideColorLegend={false}
               hideTotalCount={true}
+              showWeekdayLabels={true}
               labels={{
                 legend: {
                   less: 'Less',
