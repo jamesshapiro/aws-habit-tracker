@@ -81,9 +81,7 @@ class CdkHabitTrackerStack(Stack):
             )
         )
 
-        habit_resource = api.root.add_resource('habit')
-        habit_data_resource = api.root.add_resource(
-            'habit-data',
+        habit_resource = api.root.add_resource('habit',
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
                 allow_methods=["GET", "POST"]
@@ -171,19 +169,26 @@ class CdkHabitTrackerStack(Stack):
             'GET',
             integration=apigateway.AwsIntegration(
                 service='dynamodb',
-                action='GetItem',
+                action='Query',
                 integration_http_method='POST',
                 options=apigateway.IntegrationOptions(
                     credentials_role=read_habit_credentials_role,
                     request_templates={
-                        'application/json': f"""{{"Key": {{"PK1":{{"S":"HABIT#$input.params('PK1')"}},"SK1":{{"S":"HABIT#$input.params('SK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"HABIT#HABIT"}}}}, "TableName": "{ddb_table.table_name}"}}"""
                     },
                     integration_responses=[
-                        apigateway.IntegrationResponse(status_code='200')
+                        apigateway.IntegrationResponse(
+                            status_code='200',
+                            response_parameters={'method.response.header.Access-Control-Allow-Origin': "'*'"}
+                        )
                     ],
                 )
             ),
-            method_responses=[apigateway.MethodResponse(status_code='200')]
+            method_responses=[apigateway.MethodResponse(
+                    status_code='200',
+                    response_parameters={'method.response.header.Access-Control-Allow-Origin': True}
+                )
+            ]
         )
 
         query_habit_data_credentials_role = iam.Role(
@@ -191,6 +196,16 @@ class CdkHabitTrackerStack(Stack):
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
         ddb_table.grant_read_data(query_habit_data_credentials_role)
+
+        # Query Habit Data Points for front-end
+        habit_data_resource = api.root.add_resource(
+            'habit-data',
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=["GET", "POST"]
+            )
+        )
+
         habit_data_resource.add_method(
             'GET',
             integration=apigateway.AwsIntegration(
@@ -200,7 +215,7 @@ class CdkHabitTrackerStack(Stack):
                 options=apigateway.IntegrationOptions(
                     credentials_role=query_habit_data_credentials_role,
                     request_templates={
-                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"HABIT#$input.params('PK1')"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"HABIT#$input.params('PK1')"}}}}, "ExclusiveStartKey":{{"PK1":{{"S":"HABIT#$input.params('PK1')"}},"SK1":{{"S":"DATE#$input.params('startkey')"}}}},"Limit": $input.params('limit'), "ScanIndexForward": false, "TableName": "{ddb_table.table_name}"}}"""
                     },
                     integration_responses=[
                         apigateway.IntegrationResponse(
