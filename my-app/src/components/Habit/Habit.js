@@ -18,8 +18,7 @@ class Habit extends Component {
     const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
     const yyyy = tomorrow.getFullYear()
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
-    console.log(day)
-    const numDaysToFetch = 365 + day
+    const numDaysToFetch = Math.min(window.screen.width,window.innerWidth) > 650 ? 365 + day : 120 + day
     var url =
       process.env.REACT_APP_GET_HABIT_DATA_URL +
       `?PK1=${this.props.habitName}&limit=${numDaysToFetch}&startkey=${yyyymmdd}`

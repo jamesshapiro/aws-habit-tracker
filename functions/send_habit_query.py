@@ -12,23 +12,20 @@ topic = os.environ['EMAIL_TOPIC']
 def lambda_handler(event, context):
     # NOTE: adjust for your local timezone as necessary
     # -5 is the delta for Eastern Standard Time
-    est_time_delta = datetime.timedelta(hours=-5)
-    est_tz_object = datetime.timezone(est_time_delta, name="EST")
-    now = datetime.datetime.now(est_tz_object)
+    est_time_delta = datetime.timedelta(hours=5)
+    now = datetime.datetime.now()
+    now -= est_time_delta
     my_ulid = ulid.from_timestamp(now)
+    print(f'{my_ulid.timestamp().datetime=}')
     year = str(now.year)
     day = str(now.day).zfill(2)
     month = str(now.month).zfill(2)
-    habit = 'read for 10m'
-    todays_date = f'{year}-{month}-{day}'
     message = f'habits-survey.weakerpotions.com/?ulid={my_ulid}'
-
     response = sns_client.publish(
         TopicArn=topic,
         Message=message,
         Subject=f'HABITS SURVEY: {month}-{day}-{year}'
     )
-    
     response = sns_client.publish(
         PhoneNumber=phone_number,
         Message=message

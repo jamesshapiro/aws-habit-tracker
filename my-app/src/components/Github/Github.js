@@ -24,13 +24,15 @@ class Github extends Component {
   selectLastDays = (contributions) => {
     const today = new Date()
     const day = today.getDay()
-    const numDaysToFetch = 365 + day
+    const numDaysToFetch =
+      Math.min(window.screen.width, window.innerWidth) > 650
+        ? 365 + day
+        : 120 + day
     const cutoff = new Date(today)
     cutoff.setDate(cutoff.getDate() - numDaysToFetch)
     const cutoff_dd = String(cutoff.getDate()).padStart(2, '0')
     const cutoff_mm = String(cutoff.getMonth() + 1).padStart(2, '0')
     const cutoff_yyyy = cutoff.getFullYear()
-    console.log(`cutoff: ${cutoff_yyyy}-${cutoff_mm}-${cutoff_dd}`)
 
     contributions = contributions.map(item => {
       item.level = Math.min(item.count, 4)

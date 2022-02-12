@@ -1,4 +1,5 @@
 //aws cloudfront create-invalidation --distribution-id E70XD704NPJDM --paths "/*"
+//aws s3 cp --recursive build/ s3://cdkhabits-habitsweakerpotionscombucketdff06391-116yh481gtpp6
 import logo from './logo.svg';
 import './App.css';
 import React from 'react'
@@ -21,7 +22,6 @@ class App extends React.Component {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
         const habitItems = data.Items.map((item) => {
           return {
             habitName: item.SK1.S.slice(6),
