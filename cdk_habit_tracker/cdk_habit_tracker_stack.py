@@ -13,6 +13,7 @@ from aws_cdk import (
     aws_route53 as route53,
     aws_route53_targets as route53_targets,
     aws_cloudfront_origins as origins,
+    CfnOutput
 )
 from constructs import Construct
 
@@ -28,7 +29,8 @@ class CdkHabitTrackerStack(Stack):
             # account_id=12345678901234
             phone_number = [line for line in lines if line.startswith('phone_number')][0].split('=')[1]
             email = [line for line in lines if line.startswith('email')][0].split('=')[1]
-            subdomain_name = [line for line in lines if line.startswith('subdomain_name')][0].split('=')[1]
+            habits_subdomain_name = [line for line in lines if line.startswith('habits_subdomain_name')][0].split('=')[1]
+            habits_survey_subdomain_name = [line for line in lines if line.startswith('habits_survey_subdomain_name')][0].split('=')[1]
             hosted_zone_id = [line for line in lines if line.startswith('hosted_zone_id')][0].split('=')[1]
             zone_name = [line for line in lines if line.startswith('zone_name')][0].split('=')[1]
         
@@ -39,6 +41,7 @@ class CdkHabitTrackerStack(Stack):
             sort_key=dynamodb.Attribute(name='SK1', type=dynamodb.AttributeType.STRING),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
         )
+        CfnOutput(self, f'habits-ddb-table-name', value=ddb_table.table_name)
         ulid_layer = lambda_.LayerVersion(
             self,
             'Ulid3839Layer',
@@ -244,35 +247,38 @@ class CdkHabitTrackerStack(Stack):
             ]
         )
 
-        # HABIT TRACKER WEBSITE
-        site_bucket = s3.Bucket(
-            self, 'bucket',
-        )
+        # HABIT TRACKER / SURVEY WEBSITES
         zone = route53.HostedZone.from_hosted_zone_attributes(self, "HostedZone",
             hosted_zone_id=hosted_zone_id,
             zone_name=zone_name
         )
-        certificate = certificatemanager.DnsValidatedCertificate(
-            self, 'certificate',
-            domain_name=subdomain_name,
-            hosted_zone=zone
-        )
-        distribution = cloudfront.Distribution(
-            self, 'distribution',
-            default_behavior=cloudfront.BehaviorOptions(
-                origin=origins.S3Origin(site_bucket),
-                allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
-                viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
-            ),
-            comment='S3 HTTPS example',
-            default_root_object='index.html',
-            domain_names=[subdomain_name],
-            certificate=certificate
-        )
-        a_record_target = route53.RecordTarget.from_alias(route53_targets.CloudFrontTarget(distribution))
-        route53.ARecord(
-            self, 'alias-record',
-            zone=zone,
-            target=a_record_target,
-            record_name=subdomain_name
-        )
+        for subdomain in [habits_subdomain_name, habits_survey_subdomain_name]:
+            site_bucket = s3.Bucket(
+                self, f'{subdomain}-bucket',
+            )
+            certificate = certificatemanager.DnsValidatedCertificate(
+                self, f'{subdomain}-certificate',
+                domain_name=subdomain,
+                hosted_zone=zone
+            )
+            distribution = cloudfront.Distribution(
+                self, f'{subdomain}-distribution',
+                default_behavior=cloudfront.BehaviorOptions(
+                    origin=origins.S3Origin(site_bucket),
+                    allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
+                    viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+                ),
+                comment=f'{subdomain} S3 HTTPS',
+                default_root_object='index.html',
+                domain_names=[subdomain],
+                certificate=certificate
+            )
+            CfnOutput(self, f'{subdomain}-cf-distribution', value=distribution.distribution_id)
+            a_record_target = route53.RecordTarget.from_alias(route53_targets.CloudFrontTarget(distribution))
+            route53.ARecord(
+                self, f'{subdomain}-alias-record',
+                zone=zone,
+                target=a_record_target,
+                record_name=subdomain
+            )
+            CfnOutput(self, f'{subdomain}-bucket-name', value=site_bucket.bucket_name)

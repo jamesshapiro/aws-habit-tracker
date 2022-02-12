@@ -1,6 +1,6 @@
-//aws cloudfront create-invalidation --distribution-id E70XD704NPJDM --paths "/*"
+//aws cloudfront create-invalidation --distribution-id E2I2LGCAG9S89X --paths "/*"
 import logo from './logo.svg';
-import './App.css';
+import './App.css'
 import React from 'react'
 import Habit from './components/Habit/Habit'
 import Github from './components/Github/Github'
@@ -10,12 +10,11 @@ class App extends React.Component {
     super(props)
     this.state = {
       habits: [],
-      isMounted: false
+      isMounted: false,
     }
   }
   getNewEntries = () => {
-    var url =
-      process.env.REACT_APP_GET_HABITS_URL
+    var url = process.env.REACT_APP_GET_HABITS_URL
     fetch(url, {
       method: 'GET',
     })
@@ -25,7 +24,7 @@ class App extends React.Component {
         const habitItems = data.Items.map((item) => {
           return {
             habitName: item.SK1.S.slice(6),
-            habitColor: item.COLOR.S
+            habitColor: item.COLOR.S,
           }
         })
         var newState = { habits: [...habitItems], isMounted: true }
@@ -34,7 +33,7 @@ class App extends React.Component {
   }
 
   getHabitGraphs = () => {
-    return this.state.habits.map(habit => {
+    return this.state.habits.map((habit) => {
       return <Habit habitName={habit.habitName} habitColor={habit.habitColor} />
     })
   }
@@ -54,4 +53,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default App
