@@ -13,6 +13,8 @@ def lambda_handler(event, context):
     # NOTE: adjust for your local timezone as necessary
     # -5 is the delta for Eastern Standard Time
     est_time_delta = datetime.timedelta(hours=5)
+    # TODO: parameterize
+    user = 'james'
     now = datetime.datetime.now()
     now -= est_time_delta
     my_ulid = ulid.from_timestamp(now)
@@ -20,7 +22,8 @@ def lambda_handler(event, context):
     year = str(now.year)
     day = str(now.day).zfill(2)
     month = str(now.month).zfill(2)
-    message = f'habits-survey.weakerpotions.com/?ulid={my_ulid}'
+    # TODO get from env variable
+    message = f'habits-survey.weakerpotions.com/?ulid={my_ulid}&user={user}'
     response = sns_client.publish(
         TopicArn=topic,
         Message=message,

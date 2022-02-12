@@ -15,8 +15,9 @@ class App extends React.Component {
     }
   }
   getNewEntries = () => {
+    var james = "james" 
     var url =
-      process.env.REACT_APP_GET_HABITS_URL
+      process.env.REACT_APP_GET_HABITS_URL + `?user=${james}`
     fetch(url, {
       method: 'GET',
     })

@@ -21,7 +21,11 @@ class App extends React.Component {
     title.charAt(0).toLowerCase() + title.replaceAll(' ', '-').slice(1)
 
   getHabits = () => {
-    const url = process.env.REACT_APP_GET_HABITS_URL
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    })
+    const user = params.user
+    const url = process.env.REACT_APP_GET_HABITS_URL + `?user=${user}`
     fetch(url, {
       method: 'GET',
     })
@@ -66,28 +70,21 @@ class App extends React.Component {
       get: (searchParams, prop) => searchParams.get(prop),
     })
     const my_ulid = params.ulid
+    const user = params.user
     const data = {}
     const surveyData = survey.data
+    data.data_points = {}
     Object.keys(surveyData).forEach((surveyKey) => {
       const habitId = this.getHabitId(surveyKey)
-      data[habitId] = surveyData[surveyKey]
+      data.data_points[habitId] = surveyData[surveyKey]
     })
     const url = process.env.REACT_APP_GET_HABIT_DATA_URL
     data.ulid = my_ulid
+    data.user = user
     fetch(url, {
       method: 'POST',
       body: JSON.stringify(data),
     })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const habitItems = data.Items.map((item) => {
-    //       return item.SK1.S.slice(6)
-    //     })
-    //     var newState = { habits: [...habitItems], isMounted: true }
-    //     this.setState(newState)
-    //   })
-    
-    // alert('The results are: ' + JSON.stringify(data))
   }
 
   render() {

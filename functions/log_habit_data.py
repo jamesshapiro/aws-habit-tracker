@@ -9,22 +9,21 @@ ddb_client = boto3.client('dynamodb')
 def lambda_handler(event, context):
     body = json.loads(event['body'])
     my_ulid = ulid.from_str(body['ulid'])
+    user = body['user']
     entry_datetime = my_ulid.timestamp().datetime
     mm = f'{entry_datetime.month:02}'
     dd = f'{entry_datetime.day:02}'
     yyyy = entry_datetime.year
     print(f'{body=}')
-    for habit_name in body:
-        if habit_name == 'ulid':
-            continue
+    for habit_name in body['data_points']:
         print(f'{habit_name=}')
         print(f'DATE#{yyyy}-{mm}-{dd}')
-        level = body[habit_name] - 1
-        count = body[habit_name] - 1
+        level = body['data_points'][habit_name] - 1
+        count = body['data_points'][habit_name] - 1
         response = ddb_client.put_item(
             TableName=table_name,
             Item={
-                'PK1': {'S': f'HABIT#{habit_name}'},
+                'PK1': {'S': f'USER#{user}#HABIT#{habit_name}'},
                 'SK1': {'S': f'DATE#{yyyy}-{mm}-{dd}'},
                 'DATE_COUNT': {'S': str(count)},
                 'DATE_LEVEL': {'S': str(level)}

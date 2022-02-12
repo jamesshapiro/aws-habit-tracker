@@ -38,7 +38,7 @@ class CdkHabitTrackerStack(Stack):
         
         # HABIT TRACKER BACK-END
         ddb_table = dynamodb.Table(
-            self, 'Table',
+            self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
             sort_key=dynamodb.Attribute(name='SK1', type=dynamodb.AttributeType.STRING),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
@@ -200,7 +200,7 @@ class CdkHabitTrackerStack(Stack):
                 options=apigateway.IntegrationOptions(
                     credentials_role=read_habit_credentials_role,
                     request_templates={
-                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"HABIT#HABIT"}}}}, "TableName": "{ddb_table.table_name}"}}"""
+                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"USER#$input.params('user')#HABIT"}}}}, "TableName": "{ddb_table.table_name}"}}"""
                     },
                     integration_responses=[
                         apigateway.IntegrationResponse(
@@ -241,7 +241,7 @@ class CdkHabitTrackerStack(Stack):
                 options=apigateway.IntegrationOptions(
                     credentials_role=query_habit_data_credentials_role,
                     request_templates={
-                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"HABIT#$input.params('PK1')"}}}}, "ExclusiveStartKey":{{"PK1":{{"S":"HABIT#$input.params('PK1')"}},"SK1":{{"S":"DATE#$input.params('startkey')"}}}},"Limit": $input.params('limit'), "ScanIndexForward": false, "TableName": "{ddb_table.table_name}"}}"""
+                        'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"USER#$input.params('user')#HABIT#$input.params('PK1')"}}}}, "ExclusiveStartKey":{{"PK1":{{"S":"USER#$input.params('user')#HABIT#$input.params('PK1')"}},"SK1":{{"S":"DATE#$input.params('startkey')"}}}},"Limit": $input.params('limit'), "ScanIndexForward": false, "TableName": "{ddb_table.table_name}"}}"""
                     },
                     integration_responses=[
                         apigateway.IntegrationResponse(

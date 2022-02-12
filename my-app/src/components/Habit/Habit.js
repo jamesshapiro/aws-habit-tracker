@@ -19,9 +19,13 @@ class Habit extends Component {
     const yyyy = tomorrow.getFullYear()
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
     const numDaysToFetch = Math.min(window.screen.width,window.innerWidth) > 650 ? 365 + day : 120 + day
+    var james = "james"
     var url =
       process.env.REACT_APP_GET_HABIT_DATA_URL +
-      `?PK1=${this.props.habitName}&limit=${numDaysToFetch}&startkey=${yyyymmdd}`
+      `?user=${james}&PK1=${this.props.habitName}&limit=${numDaysToFetch}&startkey=${yyyymmdd}`
+    for (let i = 0; i < numDaysToFetch; i++) {
+
+    }
     fetch(url, {
       method: 'GET',
     })
