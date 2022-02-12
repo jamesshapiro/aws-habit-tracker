@@ -1,8 +1,5 @@
-[ ] Implement reminder form creation (React website that loads user-specific habits)
-[ ] Make DynamoDB schema multi-user
 [ ] Use Cognito
 [ ] Make a mobile-friendly view for the survey
-[ ] Add light, token-based auth for the survey
 [ ] Add whitespace to bottom of the page
 [ ] Add default blank data cells to fill in for blank days in new habits
 [ ] Grab new data on page resize
@@ -10,3 +7,6 @@
 [x] Implement reminder form w/ token
 [x] Upload actual website for grids
 [x] Make a mobile-friendly view for the habits page
+[x] Make DynamoDB schema multi-user
+[x] Implement reminder form creation (React website that loads user-specific habits)
+[x] Add light, token-based auth for the survey

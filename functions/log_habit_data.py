@@ -10,6 +10,26 @@ def lambda_handler(event, context):
     body = json.loads(event['body'])
     my_ulid = ulid.from_str(body['ulid'])
     user = body['user']
+    response = ddb_client.get_item(
+        TableName=table_name,
+        Key={
+            'PK1': {'S': f'USER#{user}'},
+            'SK1': {'S': f'ULID#{my_ulid}'}
+        }
+    )
+    if 'Item' not in response:
+        response_code = 403
+        response_body = 'INVALID TOKEN'
+        return {
+            'statusCode': response_code,
+            'headers': {
+                'Access-Control-Allow-Headers': "Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers",
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+                "X-Requested-With": "*"
+            },
+            'body': json.dumps(response_body)
+        }
     entry_datetime = my_ulid.timestamp().datetime
     mm = f'{entry_datetime.month:02}'
     dd = f'{entry_datetime.day:02}'

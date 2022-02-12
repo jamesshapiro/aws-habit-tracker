@@ -90,7 +90,7 @@ class CdkHabitTrackerStack(Stack):
         )
         send_habit_query_function_cdk.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
 
-        ddb_table.grant_write_data(log_habit_data_function_cdk)
+        ddb_table.grant_read_write_data(log_habit_data_function_cdk)
         ddb_table.grant_read_write_data(send_habit_query_function_cdk)
 
         api = apigateway.RestApi(
