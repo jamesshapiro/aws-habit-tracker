@@ -1,0 +1,6 @@
+[ ] Implement reminder form w/ token
+[ ] Implement reminder form creation (React website that loads user-specific habits)
+[ ] Make DynamoDB schema multi-user
+[ ] Use Cognito
+
+[x] Upload actual website for grids
