@@ -13,6 +13,8 @@ from aws_cdk import (
     aws_route53 as route53,
     aws_route53_targets as route53_targets,
     aws_cloudfront_origins as origins,
+    aws_events as events,
+    aws_events_targets as targets,
     CfnOutput
 )
 from constructs import Construct
@@ -50,6 +52,7 @@ class CdkHabitTrackerStack(Stack):
             compatible_architectures=[lambda_.Architecture.X86_64]
         )
 
+        topic = sns.Topic(self, "EmailTopic")
         send_habit_query_function_cdk = lambda_.Function(
             self, 'SendHabitQueryCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
@@ -57,29 +60,37 @@ class CdkHabitTrackerStack(Stack):
             handler='send_habit_query.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name,
-                'PHONE_NUMBER': phone_number
+                'PHONE_NUMBER': phone_number,
+                'EMAIL_TOPIC': topic.topic_arn
             },
             timeout=cdk.Duration.seconds(30),
             layers=[ulid_layer]
         )
 
-        receive_habit_datapoint_function_cdk = lambda_.Function(
-            self, 'ReceiveHabitDatapointCDK',
+        topic.grant_publish(send_habit_query_function_cdk)
+        topic.add_subscription(subscriptions.EmailSubscription(email))
+
+        lambda_target = targets.LambdaFunction(send_habit_query_function_cdk)
+
+        cron_rule = events.Rule(self, "ScheduleRule",
+            schedule=events.Schedule.cron(minute="0", hour="4"),
+            targets=[lambda_target]
+        )
+
+        log_habit_data_function_cdk = lambda_.Function(
+            self, 'LogHabitDataCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
             code=lambda_.Code.from_asset('functions'),
-            handler='receive_habit_datapoint.lambda_handler',
+            handler='log_habit_data.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
             timeout=cdk.Duration.seconds(30),
             layers=[ulid_layer]
         )
-
-        topic = sns.Topic(self, "HabitCDK")
-        topic.add_subscription(subscriptions.LambdaSubscription(receive_habit_datapoint_function_cdk))
         send_habit_query_function_cdk.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
 
-        ddb_table.grant_write_data(receive_habit_datapoint_function_cdk)
+        ddb_table.grant_write_data(log_habit_data_function_cdk)
         ddb_table.grant_read_data(send_habit_query_function_cdk)
 
         api = apigateway.RestApi(
@@ -245,6 +256,22 @@ class CdkHabitTrackerStack(Stack):
                     response_parameters={'method.response.header.Access-Control-Allow-Origin': True}
                 )
             ]
+        )
+        # LOG HABIT DATA FOR THE DAY
+        log_habit_data_integration = apigateway.LambdaIntegration(
+            log_habit_data_function_cdk,
+            proxy=True
+        )
+
+        habit_data_resource.add_method(
+            'POST',
+            log_habit_data_integration,
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': True,
+                }
+            }]
         )
 
         # HABIT TRACKER / SURVEY WEBSITES

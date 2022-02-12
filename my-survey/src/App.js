@@ -1,4 +1,5 @@
 //aws cloudfront create-invalidation --distribution-id E2I2LGCAG9S89X --paths "/*"
+//aws s3 cp --recursive build/ s3://cdkhabits-habitssurveyweakerpotionscombucket15fc8-19lebhcy753i2
 import logo from './logo.svg';
 import './App.css'
 import React from 'react'
@@ -16,14 +17,16 @@ class App extends React.Component {
   getTitle = (habitName) =>
     habitName.charAt(0).toUpperCase() + habitName.replaceAll('-', ' ').slice(1)
 
+  getHabitId = (title) =>
+    title.charAt(0).toLowerCase() + title.replaceAll(' ', '-').slice(1)
+
   getHabits = () => {
-    var url = process.env.REACT_APP_GET_HABITS_URL
+    const url = process.env.REACT_APP_GET_HABITS_URL
     fetch(url, {
       method: 'GET',
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
         const habitItems = data.Items.map((item) => {
           return item.SK1.S.slice(6)
         })
@@ -37,7 +40,7 @@ class App extends React.Component {
       pages: [
         {
           name: 'page1',
-          elements: this.getSurvey()
+          elements: this.getSurvey(),
         },
       ],
     }
@@ -45,7 +48,12 @@ class App extends React.Component {
 
   getSurvey = () => {
     return this.state.habits.map((habit) => {
-      return { type: 'rating', name: this.getTitle(habit), isRequired: true }
+      return {
+        type: 'rating',
+        name: this.getTitle(habit),
+        isRequired: true,
+        randomprop: 'randomprop',
+      }
     })
   }
 
@@ -53,9 +61,33 @@ class App extends React.Component {
     this.getHabits()
   }
 
-  
-  sendDataToServer(survey) {
-    alert("The results are:" + JSON.stringify(survey.data));
+  sendDataToServer = (survey) => {
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    })
+    const my_ulid = params.ulid
+    const data = {}
+    const surveyData = survey.data
+    Object.keys(surveyData).forEach((surveyKey) => {
+      const habitId = this.getHabitId(surveyKey)
+      data[habitId] = surveyData[surveyKey]
+    })
+    const url = process.env.REACT_APP_GET_HABIT_DATA_URL
+    data.ulid = my_ulid
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     const habitItems = data.Items.map((item) => {
+    //       return item.SK1.S.slice(6)
+    //     })
+    //     var newState = { habits: [...habitItems], isMounted: true }
+    //     this.setState(newState)
+    //   })
+    
+    // alert('The results are: ' + JSON.stringify(data))
   }
 
   render() {
@@ -63,12 +95,10 @@ class App extends React.Component {
 
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
-    });
+    })
     let my_ulid = params.ulid
     let s_time = ulid.decodeTime(my_ulid)
-    console.log(s_time)
     let date = new Date(s_time)
-    console.log(date)
     const dd = String(date.getDate())
     const mm = String(date.getMonth() + 1)
     const yyyy = date.getFullYear()
