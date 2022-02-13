@@ -1,7 +1,6 @@
 [ ] Use Cognito
 [ ] Make a mobile-friendly view for the survey
 [ ] Add whitespace to bottom of the page
-[ ] Add default blank data cells to fill in for blank days in new habits
 [ ] Grab new data on page resize
 
 [x] Implement reminder form w/ token
@@ -10,3 +9,4 @@
 [x] Make DynamoDB schema multi-user
 [x] Implement reminder form creation (React website that loads user-specific habits)
 [x] Add light, token-based auth for the survey
+[x] Add default blank data cells to fill in for habits with missing entries (i.e. deleted and the later re-added habits)
