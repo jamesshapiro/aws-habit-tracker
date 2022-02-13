@@ -35,9 +35,11 @@ class App extends React.Component {
   }
 
   getHabitGraphs = () => {
-    return this.state.habits.map(habit => {
-      return <Habit habitName={habit.habitName} habitColor={habit.habitColor} />
-    })
+    return <div className="habit-graphs">
+      {this.state.habits.map(habit => {
+        return <Habit habitName={habit.habitName} habitColor={habit.habitColor} />
+      })}
+    </div>
   }
 
   componentDidMount() {
