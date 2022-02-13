@@ -57,6 +57,8 @@ class App extends React.Component {
         name: this.getTitle(habit),
         isRequired: true,
         randomprop: 'randomprop',
+        minRateDescription: 'Awful',
+        maxRateDescription: 'Great'
       }
     })
   }
@@ -88,7 +90,9 @@ class App extends React.Component {
   }
 
   render() {
-    Survey.StylesManager.applyTheme('defaultV2')
+    Survey.StylesManager.applyTheme('modern')
+    Survey.StylesManager.ThemeColors['default']['$body-background-color'] =
+      'red'
 
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
@@ -106,10 +110,12 @@ class App extends React.Component {
           Rate {mm}-{dd}-{yyyy} from 1 (awful) to 5 (great){' '}
         </h1>
         {this.state.isMounted && (
-          <Survey.Survey
-            json={this.getSurveyJson()}
-            onComplete={this.sendDataToServer}
-          />
+          <div className="enclose">
+            <Survey.Survey
+              json={this.getSurveyJson()}
+              onComplete={this.sendDataToServer}
+            />
+          </div>
         )}
       </div>
     )

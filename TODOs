@@ -1,5 +1,4 @@
 [ ] Use Cognito
-[ ] Make a mobile-friendly view for the survey
 [ ] Grab new data on page resize
 
 [x] Implement reminder form w/ token
@@ -10,3 +9,4 @@
 [x] Add light, token-based auth for the survey
 [x] Add default blank data cells to fill in for habits with missing entries (i.e. deleted and the later re-added habits)
 [x] Add whitespace to bottom of the page
+[x] Make a mobile-friendly view for the survey

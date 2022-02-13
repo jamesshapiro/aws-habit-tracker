@@ -6,3 +6,9 @@
 .habit-title {
   margin: 50px 0 0 50px;
 }
+
+.enclose {
+  max-width: 50%;
+  display: inline;
+  overflow: true;
+}
