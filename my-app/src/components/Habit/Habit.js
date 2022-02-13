@@ -37,7 +37,7 @@ class Habit extends Component {
         level: 0
       })
     }
-    return daysOfYear.slice(-numDaysToFetch)
+    return daysOfYear.slice(-numDaysToFetch,-1)
   }
 
   getNewEntries = () => {
