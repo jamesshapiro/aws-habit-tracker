@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ActivityCalendar from 'react-activity-calendar'
 
 
-const SCREEN_WIDTH = 950
+const SCREEN_WIDTH = 850
 
 class Habit extends Component {
   constructor(props) {
