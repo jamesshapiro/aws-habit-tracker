@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import ActivityCalendar from 'react-activity-calendar'
 
+
+const SCREEN_WIDTH = 950
+
 class Habit extends Component {
   constructor(props) {
     super(props)
@@ -19,7 +22,7 @@ class Habit extends Component {
     const yyyy = tomorrow.getFullYear()
     const day = today.getDay()
     const numDaysToFetch =
-      Math.min(window.screen.width, window.innerWidth) > 650
+      Math.min(window.screen.width, window.innerWidth) > SCREEN_WIDTH
         ? 365 + day
         : 120 + day
     var daysOfYear = []
@@ -34,10 +37,11 @@ class Habit extends Component {
           2,
           '0'
         )}-${String(d.getDate()).padStart(2, '0')}`,
-        level: 0
+        level: 0,
       })
     }
-    return daysOfYear.slice(-numDaysToFetch,-1)
+    // return daysOfYear.slice(-numDaysToFetch,-1)
+    return daysOfYear
   }
 
   getNewEntries = () => {
@@ -49,8 +53,11 @@ class Habit extends Component {
     const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
     const yyyy = tomorrow.getFullYear()
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
-    const numDaysToFetch = Math.min(window.screen.width,window.innerWidth) > 650 ? 365 + day : 120 + day
-    var james = "james"
+    const numDaysToFetch =
+      Math.min(window.screen.width, window.innerWidth) > SCREEN_WIDTH
+        ? 365 + day
+        : 120 + day
+    var james = 'james'
     var url =
       process.env.REACT_APP_GET_HABIT_DATA_URL +
       `?user=${james}&PK1=${this.props.habitName}&limit=${numDaysToFetch}&startkey=${yyyymmdd}`
@@ -64,12 +71,9 @@ class Habit extends Component {
           return {
             count: parseInt(item.DATE_COUNT.S),
             date: item.SK1.S.slice(5),
-            level: parseInt(item.DATE_LEVEL.S),
+            level: Math.min(parseInt(item.DATE_LEVEL.S), 4),
           }
-        }
-          
-          
-      )
+        })
         //dataItems.reverse()
         dataItems.map((item) => {
           daysOfYear.forEach((dayOfYear) => {
@@ -85,13 +89,35 @@ class Habit extends Component {
       })
   }
 
+  resize = () => this.forceUpdate()
+
   componentDidMount() {
+    window.addEventListener('resize', this.resize)
     this.getNewEntries()
   }
 
-  getTitle = (habitName) => habitName.charAt(0).toUpperCase() + habitName.replaceAll('-', ' ').slice(1)
-
+  getTitle = (habitName) =>
+    habitName.charAt(0).toUpperCase() + habitName.replaceAll('-', ' ').slice(1)
+  
   render() {
+    const day = new Date().getDay()
+    const numDaysToFetch =
+      Math.min(window.screen.width, window.innerWidth) > SCREEN_WIDTH
+        ? 365 + day
+        : 120 + day
+
+    console.log(this.props.habitName.toLowerCase().includes('github'))
+    const mytheme = this.props.habitName.toLowerCase().includes('github')
+      ? {
+          level0: '#EBEDF0',
+          level1: '#9BE9A8',
+          level2: '#40C463',
+          level3: '#30A14E',
+          level4: '#216E39',
+        }
+      : null
+
+
     return (
       <div className="habit">
         <h3>{this.getTitle(this.props.habitName)}</h3>
@@ -100,7 +126,7 @@ class Habit extends Component {
             <ActivityCalendar
               color={this.props.habitColor}
               //data = {this.getDaysOfYear()}
-              data={this.state.dataPoints}
+              data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
               hideColorLegend={false}
               hideTotalCount={true}
               showWeekdayLabels={true}
@@ -126,6 +152,7 @@ class Habit extends Component {
                 totalCount: '{{count}} days of 8+ hours sleep in {{year}}',
                 weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
               }}
+              theme={mytheme}
             ></ActivityCalendar>
           )}
         </div>

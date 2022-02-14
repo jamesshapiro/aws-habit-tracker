@@ -10,3 +10,4 @@
 [x] Add default blank data cells to fill in for habits with missing entries (i.e. deleted and the later re-added habits)
 [x] Add whitespace to bottom of the page
 [x] Make a mobile-friendly view for the survey
+[ ] Implement priority field for habits

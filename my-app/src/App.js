@@ -4,7 +4,6 @@ import logo from './logo.svg';
 import './App.css';
 import React from 'react'
 import Habit from './components/Habit/Habit'
-import Github from './components/Github/Github'
 
 class App extends React.Component {
   constructor(props) {
@@ -50,7 +49,6 @@ class App extends React.Component {
     return (
       <div className="App">
         <h1 className="habit-title">Habit Tracker</h1>
-        <Github />
         {this.state.isMounted && this.getHabitGraphs()}
       </div>
     )

@@ -51,6 +51,13 @@ class CdkHabitTrackerStack(Stack):
             code=lambda_.Code.from_asset('layers/ulid-python3839.zip'),
             compatible_architectures=[lambda_.Architecture.X86_64]
         )
+        scrape_layer = lambda_.LayerVersion(
+            self,
+            'Scrape39Layer',
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+            code=lambda_.Code.from_asset('layers/requestsbs4python39.zip'),
+            compatible_architectures=[lambda_.Architecture.X86_64]
+        )
 
         topic = sns.Topic(self, "EmailTopic",display_name='Habits Survey',topic_name='habit-survey')
         send_habit_query_function_cdk = lambda_.Function(
@@ -71,11 +78,17 @@ class CdkHabitTrackerStack(Stack):
         topic.add_subscription(subscriptions.EmailSubscription(email))
 
         lambda_target = targets.LambdaFunction(send_habit_query_function_cdk)
+        
 
         cron_rule = events.Rule(self, "ScheduleRule",
             schedule=events.Schedule.cron(minute="0", hour="4"),
             targets=[lambda_target]
         )
+
+        
+
+    
+
 
         log_habit_data_function_cdk = lambda_.Function(
             self, 'LogHabitDataCDK',
@@ -90,8 +103,33 @@ class CdkHabitTrackerStack(Stack):
         )
         send_habit_query_function_cdk.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
 
+        fetch_github_data_function_cdk = lambda_.Function(
+            self, 'FetchGithubDataCDK',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('functions'),
+            handler='fetch_github_data.lambda_handler',
+            environment={
+                'DDB_TABLE': ddb_table.table_name
+            },
+            timeout=cdk.Duration.seconds(30),
+            layers=[scrape_layer]
+        )
+
+        fetch_github_target = targets.LambdaFunction(
+            fetch_github_data_function_cdk,
+            # TODO: Parameterize
+            event=events.RuleTargetInput.from_object({
+                'body': {'habits_user':'james', 'github_user': 'jamesshapiro'}
+            })
+        )
+        github_fetch_cron_rule = events.Rule(self, "GitHubFetchScheduleRule",
+            schedule=events.Schedule.cron(minute="0", hour="4"),
+            targets=[fetch_github_target]
+        )
+
         ddb_table.grant_read_write_data(log_habit_data_function_cdk)
         ddb_table.grant_read_write_data(send_habit_query_function_cdk)
+        ddb_table.grant_write_data(fetch_github_data_function_cdk)
 
         api = apigateway.RestApi(
             self,
