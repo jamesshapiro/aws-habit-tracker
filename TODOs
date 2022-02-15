@@ -1,6 +1,12 @@
 [ ] Use Cognito
-[ ] Implement priority field for habits
 
+[ ] Fix font on survey header
+[ ] Fix survey to not ask about Github
+[ ] Add display name field for habits
+[ ] Sort survey items by priority
+[ ] auto-configure Cognito domain from CDK
+
+======================================================
 [x] Implement reminder form w/ token
 [x] Upload actual website for grids
 [x] Make a mobile-friendly view for the habits page
@@ -12,3 +18,4 @@
 [x] Make a mobile-friendly view for the survey
 [x] Grab new data on page resize
 [x] Fix spacing for resize
+[x] Implement priority field for habits

@@ -11,11 +11,15 @@
   margin-bottom: 150px;
 }
 
-.habit-title {
-  margin: 50px 0 0 100px;
+.habit-h1 {
+  margin: 50px 0 0 91px;
 }
 
-@media only screen and (max-width: 650px) {
+.habit-title {
+  margin-left: -22px;
+}
+
+@media only screen and (max-width: 850px) {
   .habit {
     margin: 10px 0 0 20px;
     width: 90%;
@@ -25,7 +29,22 @@
     margin-left: 20px;
   }
 
-  .habit-title {
-    margin: 10px 0 0 5px;
+  .habit-h1 {
+    margin: 10px 0 0 10px;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .habit {
+    margin: 10px 0 0 60px;
+    width: 90%;
+  }
+
+  .commit-graph {
+    margin-left: 15px;
+  }
+
+  .habit-h1 {
+    margin: 10px 0 0 10px;
   }
 }

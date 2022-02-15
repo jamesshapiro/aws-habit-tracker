@@ -23,7 +23,8 @@ def lambda_handler(event, context):
         TableName=table_name,
         Item={
             'PK1': {'S': f'USER#{habits_user}#HABIT'},
-            'SK1': {'S': f'HABIT#000-commit-to-github'},
+            'SK1': {'S': f'HABIT#commit-to-github'},
+            'PRIORITY': {'S': '90'},
             'COLOR': {'S': '#216e39'}
         }
     )
@@ -32,7 +33,7 @@ def lambda_handler(event, context):
         response = ddb_client.put_item(
             TableName=table_name,
             Item={
-                'PK1': {'S': f'USER#{habits_user}#HABIT#000-commit-to-github'},
+                'PK1': {'S': f'USER#{habits_user}#HABIT#commit-to-github'},
                 'SK1': {'S': f'DATE#{date}'},
                 'DATE_COUNT': {'S': str(count)},
                 'DATE_LEVEL': {'S': str(count)}

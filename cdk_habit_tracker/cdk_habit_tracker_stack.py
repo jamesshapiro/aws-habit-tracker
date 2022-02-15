@@ -15,7 +15,8 @@ from aws_cdk import (
     aws_cloudfront_origins as origins,
     aws_events as events,
     aws_events_targets as targets,
-    CfnOutput
+    aws_cognito as cognito,
+    CfnOutput, Duration
 )
 from constructs import Construct
 
@@ -36,6 +37,37 @@ class CdkHabitTrackerStack(Stack):
             hosted_zone_id = [line for line in lines if line.startswith('hosted_zone_id')][0].split('=')[1]
             zone_name = [line for line in lines if line.startswith('zone_name')][0].split('=')[1]
         
+        user_pool = cognito.UserPool(
+            self, 'user-pool',
+            self_sign_up_enabled=True,
+            user_verification=cognito.UserVerificationConfig(
+                email_subject='Verify Your githabit.com Account!',
+                email_body='Thanks for signing up for GitHabit! Verify your account by entering in code {####}',
+                email_style=cognito.VerificationEmailStyle.CODE
+            ),
+            #auto_verify=cognito.AutoVerifiedAttrs.email,
+            sign_in_aliases=cognito.SignInAliases(
+                email=True
+            ),
+            sign_in_case_sensitive=False,
+            standard_attributes=cognito.StandardAttributes(
+                email=cognito.StandardAttribute(
+                    required=True,
+                    mutable=True
+                )
+            ),
+            account_recovery=cognito.AccountRecovery.EMAIL_ONLY,
+            removal_policy=cdk.RemovalPolicy.DESTROY
+        )
+
+        client = user_pool.add_client('app-client',
+            access_token_validity=Duration.days(1),
+            supported_identity_providers=[cognito.UserPoolClientIdentityProvider.COGNITO],
+            id_token_validity=Duration.days(1),
+            prevent_user_existence_errors=True,
+            refresh_token_validity=Duration.days(30)
+        )
+
         # HABIT TRACKER BACK-END
         ddb_table = dynamodb.Table(
             self, 'Habits',

@@ -13,6 +13,15 @@ class Habit extends Component {
     }
   }
 
+  getNumDaysToFetch = () => {
+    const dayOfWeekIdx = new Date().getDay()
+    const numDaysToFetch =
+      Math.min(window.screen.width, window.innerWidth) > SCREEN_WIDTH
+        ? 365 + dayOfWeekIdx
+        : 120 + dayOfWeekIdx
+    return numDaysToFetch
+  }
+
   getDaysOfYear = () => {
     const today = new Date()
     const tomorrow = new Date(today)
@@ -20,11 +29,6 @@ class Habit extends Component {
     const dd = String(tomorrow.getDate()).padStart(2, '0')
     const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
     const yyyy = tomorrow.getFullYear()
-    const day = today.getDay()
-    const numDaysToFetch =
-      Math.min(window.screen.width, window.innerWidth) > SCREEN_WIDTH
-        ? 365 + day
-        : 120 + day
     var daysOfYear = []
     for (
       var d = new Date(yyyy - 2, mm, dd);
@@ -40,27 +44,21 @@ class Habit extends Component {
         level: 0,
       })
     }
-    // return daysOfYear.slice(-numDaysToFetch,-1)
     return daysOfYear
   }
 
   getNewEntries = () => {
-    const today = new Date()
-    const tomorrow = new Date(today)
+    const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
-    const day = today.getDay()
     const dd = String(tomorrow.getDate()).padStart(2, '0')
     const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
     const yyyy = tomorrow.getFullYear()
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
-    const numDaysToFetch =
-      Math.min(window.screen.width, window.innerWidth) > SCREEN_WIDTH
-        ? 365 + day
-        : 120 + day
+    const numDaysToFetchFromDDB = 373
     var james = 'james'
     var url =
       process.env.REACT_APP_GET_HABIT_DATA_URL +
-      `?user=${james}&PK1=${this.props.habitName}&limit=${numDaysToFetch}&startkey=${yyyymmdd}`
+      `?user=${james}&PK1=${this.props.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
     var daysOfYear = this.getDaysOfYear()
     fetch(url, {
       method: 'GET',
@@ -74,7 +72,6 @@ class Habit extends Component {
             level: Math.min(parseInt(item.DATE_LEVEL.S), 4),
           }
         })
-        //dataItems.reverse()
         dataItems.map((item) => {
           daysOfYear.forEach((dayOfYear) => {
             if (item.date === dayOfYear.date) {
@@ -84,7 +81,6 @@ class Habit extends Component {
           })
         })
         const newState = { dataPoints: [...daysOfYear], isMounted: true }
-        //const newState = { dataPoints: [...dataItems], isMounted: true }
         this.setState(newState)
       })
   }
@@ -100,13 +96,7 @@ class Habit extends Component {
     habitName.charAt(0).toUpperCase() + habitName.replaceAll('-', ' ').slice(1)
   
   render() {
-    const day = new Date().getDay()
-    const numDaysToFetch =
-      Math.min(window.screen.width, window.innerWidth) > SCREEN_WIDTH
-        ? 365 + day
-        : 120 + day
-
-    console.log(this.props.habitName.toLowerCase().includes('github'))
+    const numDaysToFetch = this.getNumDaysToFetch()
     const mytheme = this.props.habitName.toLowerCase().includes('github')
       ? {
           level0: '#EBEDF0',
@@ -117,15 +107,13 @@ class Habit extends Component {
         }
       : null
 
-
     return (
       <div className="habit">
-        <h3>{this.getTitle(this.props.habitName)}</h3>
+        <h3 className="habit-title">{this.getTitle(this.props.habitName)}</h3>
         <div className="commit-graph">
           {this.state.isMounted && (
             <ActivityCalendar
               color={this.props.habitColor}
-              //data = {this.getDaysOfYear()}
               data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
               hideColorLegend={false}
               hideTotalCount={true}

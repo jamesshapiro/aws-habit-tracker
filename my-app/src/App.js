@@ -5,14 +5,24 @@ import './App.css';
 import React from 'react'
 import Habit from './components/Habit/Habit'
 
+import { Amplify, Auth } from 'aws-amplify'
+import { Authenticator } from '@aws-amplify/ui-react'
+import '@aws-amplify/ui-react/styles.css'
+
+import awsExports from './aws-exports'
+Amplify.configure(awsExports)
+
 class App extends React.Component {
   constructor(props) {
     super(props)
+    console.log(props.user)
+    console.log(props.signOut)
     this.state = {
       habits: [],
       isMounted: false
     }
   }
+
   getNewEntries = () => {
     var james = "james" 
     var url =
@@ -25,9 +35,13 @@ class App extends React.Component {
         const habitItems = data.Items.map((item) => {
           return {
             habitName: item.SK1.S.slice(6),
-            habitColor: item.COLOR.S
+            habitColor: item.COLOR.S,
+            habitPriority: item.hasOwnProperty('PRIORITY') ? parseInt(item.PRIORITY.S) : 0
           }
         })
+        habitItems.sort(
+          (habit1, habit2) => habit2.habitPriority - habit1.habitPriority
+        )
         var newState = { habits: [...habitItems], isMounted: true }
         this.setState(newState)
       })
@@ -47,9 +61,15 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="App">
-        <h1 className="habit-title">Habit Tracker</h1>
-        {this.state.isMounted && this.getHabitGraphs()}
+      <div>
+        <div className="App">
+          <h1 className="habit-h1">Habit Tracker</h1>
+          {/* <button onClick={signOut}>Sign out</button> */}
+          {this.state.isMounted && this.getHabitGraphs()}
+        </div>
+        <Authenticator>
+          {({ signOut, user }) => (<p>Hello World!</p>)}
+        </Authenticator>
       </div>
     )
   }
