@@ -1,10 +1,10 @@
 [ ] Use Cognito
 
 [ ] Fix font on survey header
-[ ] Fix survey to not ask about Github
 [ ] Add display name field for habits
 [ ] Sort survey items by priority
 [ ] auto-configure Cognito domain from CDK
+[ ] add a "create habit" front-end
 
 ======================================================
 [x] Implement reminder form w/ token
@@ -19,3 +19,4 @@
 [x] Grab new data on page resize
 [x] Fix spacing for resize
 [x] Implement priority field for habits
+[x] Fix survey to not ask about Github

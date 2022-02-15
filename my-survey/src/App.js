@@ -34,7 +34,8 @@ class App extends React.Component {
         const habitItems = data.Items.map((item) => {
           return item.SK1.S.slice(6)
         })
-        var newState = { habits: [...habitItems], isMounted: true }
+        const nonGitHubItems = habitItems.filter(item => !item.toLowerCase().includes('github'))
+        var newState = { habits: [...nonGitHubItems], isMounted: true }
         this.setState(newState)
       })
   }
