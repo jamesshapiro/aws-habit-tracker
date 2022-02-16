@@ -55,10 +55,11 @@ class Habit extends Component {
     const yyyy = tomorrow.getFullYear()
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
     const numDaysToFetchFromDDB = 373
-    var james = 'james'
+    var default_user = 'display'
+    //var default_user = 'user@example.com'.replace('@', '%40')
     var url =
       process.env.REACT_APP_GET_HABIT_DATA_URL +
-      `?user=${james}&PK1=${this.props.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
+      `?user=${default_user}&PK1=${this.props.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
     var daysOfYear = this.getDaysOfYear()
     fetch(url, {
       method: 'GET',

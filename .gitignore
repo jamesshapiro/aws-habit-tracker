@@ -13,4 +13,6 @@ curl-test-*
 habit-data-test.txt
 add_blank_data.py
 delete_habit.py
+migrate_data.py
+my-app/amplify/*
 .cdk-params

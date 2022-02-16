@@ -19,26 +19,26 @@ def lambda_handler(event, context):
     habits_user = body['habits_user']
     github_username = body['github_user']
     url = f'https://github.com/{github_username}'
-    response = ddb_client.put_item(
-        TableName=table_name,
-        Item={
-            'PK1': {'S': f'USER#{habits_user}#HABIT'},
-            'SK1': {'S': f'HABIT#commit-to-github'},
-            'PRIORITY': {'S': '90'},
-            'COLOR': {'S': '#216e39'}
-        }
-    )
-
-    for date, count in grab_data(url):
+    for user in [habits_user, 'display']:
         response = ddb_client.put_item(
             TableName=table_name,
             Item={
-                'PK1': {'S': f'USER#{habits_user}#HABIT#commit-to-github'},
-                'SK1': {'S': f'DATE#{date}'},
-                'DATE_COUNT': {'S': str(count)},
-                'DATE_LEVEL': {'S': str(count)}
+                'PK1': {'S': f'USER#{user}#HABIT'},
+                'SK1': {'S': f'HABIT#commit-to-github'},
+                'PRIORITY': {'S': '90'},
+                'COLOR': {'S': '#216e39'}
             }
         )
+        for date, count in grab_data(url):
+            response = ddb_client.put_item(
+                TableName=table_name,
+                Item={
+                    'PK1': {'S': f'USER#{user}#HABIT#commit-to-github'},
+                    'SK1': {'S': f'DATE#{date}'},
+                    'DATE_COUNT': {'S': str(count)},
+                    'DATE_LEVEL': {'S': str(count)}
+                }
+            )
 
     response_body = {'shalom': 'haverim!'}
     response_code = 200

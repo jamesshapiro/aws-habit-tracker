@@ -1,10 +1,15 @@
-[ ] Use Cognito
+[ ] Use Cognito / Amplify UI in front-end
 
 [ ] Fix font on survey header
 [ ] Add display name field for habits
 [ ] Sort survey items by priority
 [ ] auto-configure Cognito domain from CDK
 [ ] add a "create habit" front-end
+
+[ ] secure backend APIs with Cognito
+[ ] fetch new habit data on sign-in
+[ ] add tooltip to display count
+[ ] add square comments
 
 ======================================================
 [x] Implement reminder form w/ token
@@ -20,3 +25,6 @@
 [x] Fix spacing for resize
 [x] Implement priority field for habits
 [x] Fix survey to not ask about Github
+[x] make an example user for landing page
+[x] create a demo landing page user and populate with data
+[x] migrate own data to Cognito username

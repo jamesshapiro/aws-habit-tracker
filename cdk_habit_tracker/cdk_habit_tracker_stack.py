@@ -143,7 +143,7 @@ class CdkHabitTrackerStack(Stack):
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
-            timeout=cdk.Duration.seconds(30),
+            timeout=cdk.Duration.seconds(45),
             layers=[scrape_layer]
         )
 

@@ -15,8 +15,6 @@ Amplify.configure(awsExports)
 class App extends React.Component {
   constructor(props) {
     super(props)
-    console.log(props.user)
-    console.log(props.signOut)
     this.state = {
       habits: [],
       isMounted: false
@@ -24,9 +22,9 @@ class App extends React.Component {
   }
 
   getNewEntries = () => {
-    var james = "james" 
+    var default_user = "display"
     var url =
-      process.env.REACT_APP_GET_HABITS_URL + `?user=${james}`
+      process.env.REACT_APP_GET_HABITS_URL + `?user=${default_user}`
     fetch(url, {
       method: 'GET',
     })

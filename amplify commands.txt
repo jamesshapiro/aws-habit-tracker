@@ -1,0 +1,20 @@
+1. Use amplify CLI to incorporate pre-built User Pool / Client
+
+(for reference: https://docs.amplify.aws/cli/auth/import/)
+
+amplify --version
+amplify init
+
+-> Create a new IAM user
+-> AWS Profile (select existing profile)
+
+amplify import auth
+-> User pool only (import the right user pool)
+
+amplify status (to verify it was successful)
+amplify push
+
+2. Use pre-built UI components
+
+(for reference: https://docs.amplify.aws/lib/auth/getting-started/q/platform/js/#enable-sign-up-sign-in-and-sign-out )
+
