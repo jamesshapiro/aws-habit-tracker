@@ -96,13 +96,21 @@ class Habit extends Component {
     const yyyy = tomorrow.getFullYear()
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
     const numDaysToFetchFromDDB = 373
-    var url =
-      process.env.REACT_APP_GET_HABIT_DATA_URL +
-      `?user=${user}&PK1=${this.props.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
     var daysOfYear = this.getDaysOfYear(user, this.props.habitName)
-    if (user != 'display') {
+    if (user !== 'display') {
+      const username = user.attributes.email.replace('@', '%40')
+      const token = user.signInUserSession.idToken.jwtToken
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      }
+      var url =
+        process.env.REACT_APP_GET_HABIT_DATA_AUTH_URL +
+        `?user=${username}&PK1=${this.props.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
+      
       fetch(url, {
         method: 'GET',
+        headers: headers
       })
         .then((response) => response.json())
         .then((data) => {
@@ -131,44 +139,13 @@ class Habit extends Component {
   }
 
   getNewEntries = () => {
-    // let user = this.getCurrentUser()
     Auth.currentAuthenticatedUser()
       .then((user) => {
-        let username = user.attributes.email.replace('@', '%40')
-        this.getSquaresForUser(username)
+        this.getSquaresForUser(user)
       })
       .catch((err) => {
-        let username = 'display'
-        this.getSquaresForUser(username)
+        this.getSquaresForUser('display')
       })
-    //var default_user = 'user@example.com'.replace('@', '%40')
-    // var url =
-    //   process.env.REACT_APP_GET_HABIT_DATA_URL +
-    //   `?user=${user}&PK1=${this.props.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
-    // var daysOfYear = this.getDaysOfYear()
-    // fetch(url, {
-    //   method: 'GET',
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const dataItems = data.Items.map((item) => {
-    //       return {
-    //         count: parseInt(item.DATE_COUNT.S),
-    //         date: item.SK1.S.slice(5),
-    //         level: Math.min(parseInt(item.DATE_LEVEL.S), 4),
-    //       }
-    //     })
-    //     dataItems.map((item) => {
-    //       daysOfYear.forEach((dayOfYear) => {
-    //         if (item.date === dayOfYear.date) {
-    //           dayOfYear.count = item.count
-    //           dayOfYear.level = item.level
-    //         }
-    //       })
-    //     })
-    //     const newState = { dataPoints: [...daysOfYear], isMounted: true }
-    //     this.setState(newState)
-    //   })
   }
 
   resize = () => this.forceUpdate()

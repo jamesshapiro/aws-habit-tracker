@@ -6,13 +6,23 @@ table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
-    # print(f'{event=}')
+    #print(f'{event=}')
     email = event['requestContext']['authorizer']['claims']['email']
+    query_string_parameters = event['queryStringParameters']
+    habit_name = query_string_parameters['PK1']
+    limit = int(query_string_parameters['limit'])
+    start_key = query_string_parameters['startkey']
     response = ddb_client.query(
         TableName=table_name,
         KeyConditionExpression='#pk1=:pk1',
         ExpressionAttributeNames={'#pk1':'PK1'},
-        ExpressionAttributeValues={':pk1':{'S':f'USER#{email}#HABIT'}}
+        ExpressionAttributeValues={':pk1':{'S':f'USER#{email}#HABIT#{habit_name}'}},
+        ExclusiveStartKey={
+            'PK1':{'S':f'USER#{email}#HABIT#{habit_name}'},
+            'SK1':{'S':f'DATE#{start_key}'}
+        },
+        Limit=limit,
+        ScanIndexForward=False
     )
     response_body = response
     response_code = 200

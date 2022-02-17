@@ -14,19 +14,10 @@ Amplify.configure(awsExports)
 
 async function signOut() {
   try {
-    await Auth.signOut({ global: true })
+    await Auth.signOut()
     window.location.reload(false)
   } catch (error) {
     console.log('error signing out: ', error)
-  }
-}
-
-async function currentSession() {
-  try {
-    const result = await Auth.currentSession()
-    return result
-  } catch (error) {
-    console.log('error retrieving current session: ', error)
   }
 }
 
@@ -45,13 +36,11 @@ class App extends React.Component {
       .then((user) => {
         const username = user.attributes.email.replace('@', '%40')
         const token = user.signInUserSession.idToken.jwtToken
-        console.log(token)
         const headers = {
           'Content-Type': 'application/json',
           Authorization: token
         }
         var url = process.env.REACT_APP_GET_HABITS_AUTH_URL + `?user=${username}`
-        console.log(url)
         fetch(url, {
           method: 'GET',
           headers: headers
@@ -141,11 +130,6 @@ class App extends React.Component {
     this.setState(newState)
   }
 
-  getUserSession = () => {
-    const result = currentSession()
-    console.log(result)
-  }
-
   getGraphsForUser = () => {
     return (
       <div>
@@ -154,7 +138,6 @@ class App extends React.Component {
             Habit Tracker
             <button onClick={this.goToLogin}>Login/Signup</button>
             <button onClick={() => signOut()}>Signout</button>
-            <button onClick={() => currentSession()}>SESSION</button>
           </div>
           <h1 className="habit-h1">{}</h1>
           {this.state.isMounted && this.getHabitGraphs()}

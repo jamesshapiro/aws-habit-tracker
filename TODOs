@@ -1,12 +1,14 @@
-[ ] Use Cognito / Amplify UI in front-end
+High:
+[ ] add a "create habit" front-end
+[ ] Fix survey issue
 
+Medium:
 [ ] Fix font on survey header
 [ ] Add display name field for habits
-[ ] Sort survey items by priority
 [ ] auto-configure Cognito domain from CDK
-[ ] add a "create habit" front-end
 
-[ ] secure backend APIs with Cognito
+Low:
+[ ] Sort survey items by priority
 [ ] add tooltip to display count
 [ ] add square comments
 
@@ -29,3 +31,6 @@
 [x] migrate own data to Cognito username
 [x] generate random-looking display data without an API call
 [x] retrieve signed-in user email and use to fetch new habit data
+
+[x] Use Cognito / Amplify UI in front-end
+[x] secure backend APIs with Cognito
