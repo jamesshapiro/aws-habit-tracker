@@ -1,5 +1,4 @@
 from aws_cdk import (
-    # Duration,
     Stack,
     aws_lambda as lambda_,
     aws_dynamodb as dynamodb,
@@ -16,10 +15,9 @@ from aws_cdk import (
     aws_events as events,
     aws_events_targets as targets,
     aws_cognito as cognito,
-    CfnOutput, Duration
+    CfnOutput, Duration, Aws
 )
 from constructs import Construct
-
 import aws_cdk as cdk
 
 class CdkHabitTrackerStack(Stack):
@@ -37,6 +35,14 @@ class CdkHabitTrackerStack(Stack):
             hosted_zone_id = [line for line in lines if line.startswith('hosted_zone_id')][0].split('=')[1]
             zone_name = [line for line in lines if line.startswith('zone_name')][0].split('=')[1]
         
+        # HABIT TRACKER BACK-END
+        ddb_table = dynamodb.Table(
+            self, 'Habits',
+            partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name='SK1', type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+        )
+
         user_pool = cognito.UserPool(
             self, 'user-pool',
             self_sign_up_enabled=True,
@@ -72,13 +78,6 @@ class CdkHabitTrackerStack(Stack):
             refresh_token_validity=Duration.days(30)
         )
 
-        # HABIT TRACKER BACK-END
-        ddb_table = dynamodb.Table(
-            self, 'Habits',
-            partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
-            sort_key=dynamodb.Attribute(name='SK1', type=dynamodb.AttributeType.STRING),
-            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
-        )
         CfnOutput(self, f'habits-ddb-table-name', value=ddb_table.table_name)
         ulid_layer = lambda_.LayerVersion(
             self,
@@ -95,27 +94,42 @@ class CdkHabitTrackerStack(Stack):
             compatible_architectures=[lambda_.Architecture.X86_64]
         )
 
-        topic = sns.Topic(self, "EmailTopic",display_name='Habits Survey',topic_name='habit-survey')
-        send_habit_query_function_cdk = lambda_.Function(
-            self, 'SendHabitQueryCDK',
+        #topic = sns.Topic(self, "EmailTopic",display_name='Habits Survey', topic_name='habit-survey')
+        send_habit_survey_function_cdk = lambda_.Function(
+            self, 'SendHabitSurveyCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
             code=lambda_.Code.from_asset('functions'),
-            handler='send_habit_query.lambda_handler',
+            handler='send_habit_survey.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name,
-                'PHONE_NUMBER': phone_number,
-                'EMAIL_TOPIC': topic.topic_arn
+                #'PHONE_NUMBER': phone_number,
+                #'EMAIL_TOPIC': topic.topic_arn,
+                'USER_POOL_ID': user_pool.user_pool_id
             },
-            timeout=cdk.Duration.seconds(30),
+            timeout=Duration.minutes(15),
             layers=[ulid_layer]
         )
 
-        topic.grant_publish(send_habit_query_function_cdk)
-        topic.add_subscription(subscriptions.EmailSubscription(email))
+        send_habit_survey_policy = iam.Policy(
+            self, 'cdk-habits-cognito-list-users',
+            statements=[
+                iam.PolicyStatement(
+                    actions=['cognito-idp:ListUsers'],
+                    resources=[user_pool.user_pool_arn]
+                ),
+                iam.PolicyStatement(
+                    actions=['ses:SendEmail','ses:SendRawEmail'],
+                    resources=[f'arn:aws:ses:{Aws.REGION}:{Aws.ACCOUNT_ID}:identity/githabitsurvey@gmail.com']
+                )
+            ]
+        )
+        send_habit_survey_function_cdk.role.attach_inline_policy(send_habit_survey_policy)
 
-        lambda_target = targets.LambdaFunction(send_habit_query_function_cdk)
+        #topic.grant_publish(send_habit_survey_function_cdk)
+        #topic.add_subscription(subscriptions.EmailSubscription(email))
+
+        lambda_target = targets.LambdaFunction(send_habit_survey_function_cdk)
         
-
         cron_rule = events.Rule(self, "ScheduleRule",
             schedule=events.Schedule.cron(minute="0", hour="4"),
             targets=[lambda_target]
@@ -129,10 +143,9 @@ class CdkHabitTrackerStack(Stack):
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
-            timeout=cdk.Duration.seconds(30),
+            timeout=Duration.seconds(30),
             layers=[ulid_layer]
         )
-        send_habit_query_function_cdk.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
 
         fetch_github_data_function_cdk = lambda_.Function(
             self, 'FetchGithubDataCDK',
@@ -142,7 +155,7 @@ class CdkHabitTrackerStack(Stack):
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
-            timeout=cdk.Duration.seconds(45),
+            timeout=Duration.seconds(45),
             layers=[scrape_layer]
         )
 
@@ -159,7 +172,7 @@ class CdkHabitTrackerStack(Stack):
         )
 
         ddb_table.grant_read_write_data(log_habit_data_function_cdk)
-        ddb_table.grant_read_write_data(send_habit_query_function_cdk)
+        ddb_table.grant_read_write_data(send_habit_survey_function_cdk)
         ddb_table.grant_write_data(fetch_github_data_function_cdk)
 
         api = apigateway.RestApi(
@@ -207,7 +220,7 @@ class CdkHabitTrackerStack(Stack):
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
-            timeout=cdk.Duration.seconds(30),
+            timeout=Duration.seconds(30),
         )
         ddb_table.grant_read_data(get_habit_auth_function_cdk)
 
@@ -219,7 +232,7 @@ class CdkHabitTrackerStack(Stack):
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
-            timeout=cdk.Duration.seconds(30),
+            timeout=Duration.seconds(30),
         )
         ddb_table.grant_read_data(get_habit_data_auth_function_cdk)
 

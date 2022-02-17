@@ -1,11 +1,14 @@
 High:
 [ ] add a "create habit" front-end
 [ ] Fix survey issue
+[ ] Create backend for ULID token that retrieves habits
 
 Medium:
 [ ] Fix font on survey header
 [ ] Add display name field for habits
 [ ] auto-configure Cognito domain from CDK
+[ ] log and check unsubscriptions
+[ ] write an unsubscriber function
 
 Low:
 [ ] Sort survey items by priority
@@ -31,6 +34,5 @@ Low:
 [x] migrate own data to Cognito username
 [x] generate random-looking display data without an API call
 [x] retrieve signed-in user email and use to fetch new habit data
-
 [x] Use Cognito / Amplify UI in front-end
 [x] secure backend APIs with Cognito
