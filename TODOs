@@ -7,7 +7,6 @@
 [ ] add a "create habit" front-end
 
 [ ] secure backend APIs with Cognito
-[ ] fetch new habit data on sign-in
 [ ] add tooltip to display count
 [ ] add square comments
 
@@ -28,3 +27,5 @@
 [x] make an example user for landing page
 [x] create a demo landing page user and populate with data
 [x] migrate own data to Cognito username
+[x] generate random-looking display data without an API call
+[x] retrieve signed-in user email and use to fetch new habit data

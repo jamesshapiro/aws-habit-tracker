@@ -1,18 +1,18 @@
 .habit {
-  margin: 30px 0 0 115px;
-  width: 85%;
+  margin: 10px 0 0 60px;
+  width: 90%;
 }
 
 .commit-graph {
   margin-left: 15px;
 }
 
-.habit-graphs {
+/* .habit-graphs {
   margin-bottom: 150px;
-}
+} */
 
 .habit-h1 {
-  margin: 50px 0 0 91px;
+  margin: 10px 0 0 10px;
 }
 
 .habit-title {
@@ -20,31 +20,7 @@
 }
 
 @media only screen and (max-width: 850px) {
-  .habit {
-    margin: 10px 0 0 20px;
-    width: 90%;
-  }
-
-  .commit-graph {
-    margin-left: 20px;
-  }
-
-  .habit-h1 {
-    margin: 10px 0 0 10px;
-  }
 }
 
 @media only screen and (max-width: 1200px) {
-  .habit {
-    margin: 10px 0 0 60px;
-    width: 90%;
-  }
-
-  .commit-graph {
-    margin-left: 15px;
-  }
-
-  .habit-h1 {
-    margin: 10px 0 0 10px;
-  }
 }
