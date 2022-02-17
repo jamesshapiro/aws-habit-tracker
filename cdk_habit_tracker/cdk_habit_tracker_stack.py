@@ -60,6 +60,10 @@ class CdkHabitTrackerStack(Stack):
             removal_policy=cdk.RemovalPolicy.DESTROY
         )
 
+        auth = apigateway.CognitoUserPoolsAuthorizer(self, "habitsAuthorizer",
+            cognito_user_pools=[user_pool]
+        )
+
         client = user_pool.add_client('app-client',
             access_token_validity=Duration.days(1),
             supported_identity_providers=[cognito.UserPoolClientIdentityProvider.COGNITO],
@@ -116,11 +120,6 @@ class CdkHabitTrackerStack(Stack):
             schedule=events.Schedule.cron(minute="0", hour="4"),
             targets=[lambda_target]
         )
-
-        
-
-    
-
 
         log_habit_data_function_cdk = lambda_.Function(
             self, 'LogHabitDataCDK',
@@ -182,6 +181,44 @@ class CdkHabitTrackerStack(Stack):
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
                 allow_methods=["GET", "POST"]
             )
+        )
+
+        habit_auth_resource = api.root.add_resource(
+            'habit-auth',
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=["GET", "POST"]
+            )
+        )
+
+        get_habit_auth_function_cdk = lambda_.Function(
+            self, 'GetHabitAuthCDK',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('functions'),
+            handler='get_habit_auth.lambda_handler',
+            environment={
+                'DDB_TABLE': ddb_table.table_name
+            },
+            timeout=cdk.Duration.seconds(30),
+        )
+        ddb_table.grant_read_data(get_habit_auth_function_cdk)
+
+        # GET HABIT AUTH FUNCTION
+        get_habit_auth_integration = apigateway.LambdaIntegration(
+            get_habit_auth_function_cdk,
+            proxy=True
+        ) 
+        habit_auth_resource.add_method(
+            'GET',
+            get_habit_auth_integration,
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': True,
+                }
+            }],
+            authorizer=auth,
+            authorization_type=apigateway.AuthorizationType.COGNITO
         )
 
         create_habit_credentials_role = iam.Role(

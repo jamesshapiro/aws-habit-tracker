@@ -40,30 +40,24 @@ class App extends React.Component {
     }
   }
 
-  // TODO: try this with functional components later
-  // getCurrentUser = async () => {
-  //   try {
-  //     const user = await Auth.currentAuthenticatedUser()
-  //     return user.attributes.email
-  //   } catch (error) {
-  //     return 'display'
-  //   }
-  // }
-
-  // colors = ['#b92514', '#2270A1', '#1e4500']
-
-  getEntriesForUser = (user) => {
-    
-  }
-
   getNewEntries = () => {
     Auth.currentAuthenticatedUser()
       .then((user) => {
         const username = user.attributes.email.replace('@', '%40')
-        var url = process.env.REACT_APP_GET_HABITS_URL + `?user=${username}`
+        const token = user.signInUserSession.idToken.jwtToken
+        console.log(token)
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: token
+        }
+        var url = process.env.REACT_APP_GET_HABITS_AUTH_URL + `?user=${username}`
+        console.log(url)
         fetch(url, {
           method: 'GET',
-        })
+          headers: headers
+        }, 
+        
+        )
           .then((response) => response.json())
           .then((data) => {
             const habitItems = data.Items.map((item) => {
@@ -85,7 +79,6 @@ class App extends React.Component {
             }
             this.setState(newState)
           })
-        this.getEntriesForUser(username)
       })
       .catch((err) => {
         const habits = [
@@ -123,31 +116,6 @@ class App extends React.Component {
         this.setState(newState)
         return
       })
-    // var url = process.env.REACT_APP_GET_HABITS_URL + `?user=${user}`
-    // fetch(url, {
-    //   method: 'GET',
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const habitItems = data.Items.map((item) => {
-    //       return {
-    //         habitName: item.SK1.S.slice(6),
-    //         habitColor: item.COLOR.S,
-    //         habitPriority: item.hasOwnProperty('PRIORITY')
-    //           ? parseInt(item.PRIORITY.S)
-    //           : 0,
-    //       }
-    //     })
-    //     habitItems.sort(
-    //       (habit1, habit2) => habit2.habitPriority - habit1.habitPriority
-    //     )
-    //     var newState = {
-    //       habits: [...habitItems],
-    //       isMounted: true,
-    //       isLoginPage: false,
-    //     }
-    //     this.setState(newState)
-    //   })
   }
 
   getHabitGraphs = () => {
