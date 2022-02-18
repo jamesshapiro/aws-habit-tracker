@@ -44,9 +44,7 @@ class App extends React.Component {
         fetch(url, {
           method: 'GET',
           headers: headers
-        }, 
-        
-        )
+        })
           .then((response) => response.json())
           .then((data) => {
             const habitItems = data.Items.map((item) => {
@@ -130,14 +128,30 @@ class App extends React.Component {
     this.setState(newState)
   }
 
+  getIsLoggedIn = () => {
+    console.log(Object.keys(localStorage))
+    let userIsLoggedIn = false
+    Object.keys(localStorage).map((key) => {
+      if(key.startsWith('CognitoIdentityServiceProvider') && key.endsWith('LastAuthUser')) {
+        userIsLoggedIn = true
+      }
+    })
+    console.log(userIsLoggedIn)
+    return userIsLoggedIn
+  }
+
   getGraphsForUser = () => {
     return (
       <div>
         <div className="App">
           <div className="habit-h1">
             Habit Tracker
-            <button onClick={this.goToLogin}>Login/Signup</button>
-            <button onClick={() => signOut()}>Signout</button>
+            {!this.getIsLoggedIn() && (
+              <button onClick={this.goToLogin}>Login/Signup</button>
+            )}
+            {this.getIsLoggedIn() && (
+              <button onClick={() => signOut()}>Signout</button>
+            )}
           </div>
           <h1 className="habit-h1">{}</h1>
           {this.state.isMounted && this.getHabitGraphs()}

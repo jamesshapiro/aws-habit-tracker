@@ -23,7 +23,6 @@ class App extends React.Component {
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })
-    console.log(params)
     const mega_ulid = params.mega_ulid
     const url = process.env.REACT_APP_SURVEY_URL + `?mega_ulid=${mega_ulid}`
     fetch(url, {
@@ -93,15 +92,11 @@ class App extends React.Component {
 
   render() {
     Survey.StylesManager.applyTheme('modern')
-    Survey.StylesManager.ThemeColors['default']['$body-background-color'] =
-      'red'
-
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })
     let date_string = params.date_string
-    // let s_time = ulid.decodeTime(my_ulid)
-    // let date = new Date(s_time)
+    console.log(date_string)
     const dd = date_string.slice(-2)
     const mm = date_string.slice(5,7)
     const yyyy = date_string.slice(0, 4)
