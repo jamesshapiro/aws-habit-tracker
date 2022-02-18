@@ -11,7 +11,6 @@ import '@aws-amplify/ui-react/styles.css'
 import awsExports from './aws-exports'
 Amplify.configure(awsExports)
 
-
 async function signOut() {
   try {
     await Auth.signOut()
@@ -28,7 +27,16 @@ class App extends React.Component {
       habits: [],
       isMounted: false,
       isLoginPage: false,
+      isInEditHabitsMode: false,
     }
+  }
+
+  enterEditHabitsMode = () => {
+    this.setState({ isInEditHabitsMode: true })
+  }
+
+  exitEditHabitsMode = () => {
+    this.setState({ isInEditHabitsMode: false })
   }
 
   getNewEntries = () => {
@@ -38,12 +46,13 @@ class App extends React.Component {
         const token = user.signInUserSession.idToken.jwtToken
         const headers = {
           'Content-Type': 'application/json',
-          Authorization: token
+          Authorization: token,
         }
-        var url = process.env.REACT_APP_GET_HABITS_AUTH_URL + `?user=${username}`
+        var url =
+          process.env.REACT_APP_GET_HABITS_AUTH_URL + `?user=${username}`
         fetch(url, {
           method: 'GET',
-          headers: headers
+          headers: headers,
         })
           .then((response) => response.json())
           .then((data) => {
@@ -117,6 +126,20 @@ class App extends React.Component {
     )
   }
 
+  getEditHabitsUI = () => {
+    console.log(this.state.habits)
+    return (
+      <div className="habit-graphs">
+        {this.state.habits.map((habit) => {
+          return (
+            // <Habit habitName={habit.habitName} habitColor={habit.habitColor} />
+            <li>{habit.habitName}</li>
+          )
+        })}
+      </div>
+    )
+  }
+
   componentDidMount() {
     this.getNewEntries()
   }
@@ -129,14 +152,15 @@ class App extends React.Component {
   }
 
   getIsLoggedIn = () => {
-    console.log(Object.keys(localStorage))
     let userIsLoggedIn = false
     Object.keys(localStorage).map((key) => {
-      if(key.startsWith('CognitoIdentityServiceProvider') && key.endsWith('LastAuthUser')) {
+      if (
+        key.startsWith('CognitoIdentityServiceProvider') &&
+        key.endsWith('LastAuthUser')
+      ) {
         userIsLoggedIn = true
       }
     })
-    console.log(userIsLoggedIn)
     return userIsLoggedIn
   }
 
@@ -145,16 +169,33 @@ class App extends React.Component {
       <div>
         <div className="App">
           <div className="habit-h1">
-            Habit Tracker
+            {!this.state.isInEditHabitsMode && 'Habit Tracker'}
             {!this.getIsLoggedIn() && (
               <button onClick={this.goToLogin}>Login/Signup</button>
             )}
             {this.getIsLoggedIn() && (
               <button onClick={() => signOut()}>Signout</button>
             )}
+            {this.getIsLoggedIn() && !this.state.isInEditHabitsMode && (
+              <button onClick={() => this.enterEditHabitsMode()}>
+                Edit Habits
+              </button>
+            )}
+            {this.getIsLoggedIn() && this.state.isInEditHabitsMode && (
+              <button onClick={() => this.exitEditHabitsMode()}>
+                Back to Grid!
+              </button>
+            )}
           </div>
           <h1 className="habit-h1">{}</h1>
-          {this.state.isMounted && this.getHabitGraphs()}
+          {this.state.isMounted &&
+            !this.state.isInEditHabitsMode &&
+            this.getHabitGraphs()
+          }
+          {this.state.isMounted &&
+            this.state.isInEditHabitsMode &&
+            this.getEditHabitsUI()
+          }
         </div>
       </div>
     )
@@ -164,7 +205,7 @@ class App extends React.Component {
     if (this.state.isLoginPage) {
       return (
         <Authenticator>
-          {({ signOut, user }) => {
+          {() => {
             this.setState({ isLoginPage: false })
             window.location.reload(false)
             return this.getGraphsForUser()

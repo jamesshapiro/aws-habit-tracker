@@ -154,7 +154,7 @@ class CdkHabitTrackerStack(Stack):
             fetch_github_data_function_cdk,
             # TODO: Parameterize
             event=events.RuleTargetInput.from_object({
-                'body': {'habits_user':'james', 'github_user': 'jamesshapiro'}
+                'body': {'habits_user':email, 'github_user': 'jamesshapiro'}
             })
         )
         github_fetch_cron_rule = events.Rule(self, "GitHubFetchScheduleRule",

@@ -10,7 +10,6 @@ Medium:
 [ ] auto-configure Cognito domain from CDK
 [ ] log and check unsubscriptions
 [ ] write an unsubscriber function
-[ ] halve the left-margin for mobile view
 [ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
 [ ] also consider just SHA-256-ing a long random value for the token
 [ ] add "request survey" functionality
@@ -43,3 +42,4 @@ Low:
 [x] Use Cognito / Amplify UI in front-end
 [x] secure backend APIs with Cognito
 [x] Only show log-in or sign-out buttons when appropriate
+[x] halve the left-margin for mobile view
