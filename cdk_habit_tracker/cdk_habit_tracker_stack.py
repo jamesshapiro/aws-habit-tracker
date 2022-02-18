@@ -35,7 +35,6 @@ class CdkHabitTrackerStack(Stack):
             hosted_zone_id = [line for line in lines if line.startswith('hosted_zone_id')][0].split('=')[1]
             zone_name = [line for line in lines if line.startswith('zone_name')][0].split('=')[1]
         
-        # HABIT TRACKER BACK-END
         ddb_table = dynamodb.Table(
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
@@ -51,7 +50,6 @@ class CdkHabitTrackerStack(Stack):
                 email_body='Thanks for signing up for GitHabit! Verify your account by entering in code {####}',
                 email_style=cognito.VerificationEmailStyle.CODE
             ),
-            #auto_verify=cognito.AutoVerifiedAttrs.email,
             sign_in_aliases=cognito.SignInAliases(
                 email=True
             ),
@@ -94,7 +92,6 @@ class CdkHabitTrackerStack(Stack):
             compatible_architectures=[lambda_.Architecture.X86_64]
         )
 
-        #topic = sns.Topic(self, "EmailTopic",display_name='Habits Survey', topic_name='habit-survey')
         send_habit_survey_function_cdk = lambda_.Function(
             self, 'SendHabitSurveyCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
@@ -102,8 +99,6 @@ class CdkHabitTrackerStack(Stack):
             handler='send_habit_survey.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name,
-                #'PHONE_NUMBER': phone_number,
-                #'EMAIL_TOPIC': topic.topic_arn,
                 'USER_POOL_ID': user_pool.user_pool_id
             },
             timeout=Duration.minutes(15),
@@ -125,12 +120,9 @@ class CdkHabitTrackerStack(Stack):
         )
         send_habit_survey_function_cdk.role.attach_inline_policy(send_habit_survey_policy)
 
-        #topic.grant_publish(send_habit_survey_function_cdk)
-        #topic.add_subscription(subscriptions.EmailSubscription(email))
-
         lambda_target = targets.LambdaFunction(send_habit_survey_function_cdk)
         
-        cron_rule = events.Rule(self, "ScheduleRule",
+        events.Rule(self, "ScheduleRule",
             schedule=events.Schedule.cron(minute="0", hour="4"),
             targets=[lambda_target]
         )
@@ -143,8 +135,7 @@ class CdkHabitTrackerStack(Stack):
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
-            timeout=Duration.seconds(30),
-            layers=[ulid_layer]
+            timeout=Duration.seconds(30)
         )
 
         fetch_github_data_function_cdk = lambda_.Function(
@@ -189,13 +180,6 @@ class CdkHabitTrackerStack(Stack):
             )
         )
 
-        # habit_resource = api.root.add_resource('habit',
-        #     default_cors_preflight_options=apigateway.CorsOptions(
-        #         allow_origins=apigateway.Cors.ALL_ORIGINS,
-        #         allow_methods=["GET", "POST"]
-        #     )
-        # )
-
         habit_auth_resource = api.root.add_resource(
             'habit-auth',
             default_cors_preflight_options=apigateway.CorsOptions(
@@ -206,6 +190,14 @@ class CdkHabitTrackerStack(Stack):
 
         habit_auth_data_resource = api.root.add_resource(
             'habit-data-auth',
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=["GET", "POST"]
+            )
+        )
+
+        habit_survey_resource = api.root.add_resource(
+            'habit-survey',
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
                 allow_methods=["GET", "POST"]
@@ -236,6 +228,18 @@ class CdkHabitTrackerStack(Stack):
         )
         ddb_table.grant_read_data(get_habit_data_auth_function_cdk)
 
+        get_habit_survey_function_cdk = lambda_.Function(
+            self, 'GetHabitSurveyCDK',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('functions'),
+            handler='get_habit_survey.lambda_handler',
+            environment={
+                'DDB_TABLE': ddb_table.table_name
+            },
+            timeout=Duration.seconds(30),
+        )
+        ddb_table.grant_read_data(get_habit_survey_function_cdk)
+
         # GET HABIT AUTH FUNCTIONS
         get_habit_auth_integration = apigateway.LambdaIntegration(
             get_habit_auth_function_cdk,
@@ -245,6 +249,11 @@ class CdkHabitTrackerStack(Stack):
             get_habit_data_auth_function_cdk,
             proxy=True
         )
+        get_habit_survey_integration = apigateway.LambdaIntegration(
+            get_habit_survey_function_cdk,
+            proxy=True
+        )
+
         habit_auth_resource.add_method(
             'GET',
             get_habit_auth_integration,
@@ -257,6 +266,7 @@ class CdkHabitTrackerStack(Stack):
             authorizer=auth,
             authorization_type=apigateway.AuthorizationType.COGNITO
         )
+
         habit_auth_data_resource.add_method(
             'GET',
             get_habit_data_auth_integration,
@@ -269,158 +279,60 @@ class CdkHabitTrackerStack(Stack):
             authorizer=auth,
             authorization_type=apigateway.AuthorizationType.COGNITO
         )
-        
+
+        habit_survey_resource.add_method(
+            'GET',
+            get_habit_survey_integration,
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': True,
+                }
+            }]
+        )
+
+        #######################################################################
 
         create_habit_credentials_role = iam.Role(
             self, 'cdk-create-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
         ddb_table.grant_write_data(create_habit_credentials_role)
-        # habit_resource.add_method(
-        #     'POST',
-        #     integration=apigateway.AwsIntegration(
-        #         service='dynamodb',
-        #         action='PutItem',
-        #         integration_http_method='POST',
-        #         options=apigateway.IntegrationOptions(
-        #             credentials_role=create_habit_credentials_role,
-        #             request_templates={
-        #                 'application/json': f'{{"Item": $input.body, "TableName": "{ddb_table.table_name}"}}'
-        #             },
-        #             integration_responses=[
-        #                 apigateway.IntegrationResponse(status_code='200')
-        #             ],
-        #         )
-        #     ),
-        #     method_responses=[apigateway.MethodResponse(status_code='200')]
-        # )
 
         delete_habit_credentials_role = iam.Role(
             self, 'cdk-delete-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
         ddb_table.grant_full_access(delete_habit_credentials_role)
-        # habit_resource.add_method(
-        #     'DELETE',
-        #     integration=apigateway.AwsIntegration(
-        #         service='dynamodb',
-        #         action='DeleteItem',
-        #         integration_http_method='POST',
-        #         options=apigateway.IntegrationOptions(
-        #             credentials_role=delete_habit_credentials_role,
-        #             request_templates={
-        #                 'application/json': f'{{"Key": $input.body, "TableName": "{ddb_table.table_name}"}}'
-        #             },
-        #             integration_responses=[
-        #                 apigateway.IntegrationResponse(status_code='200')
-        #             ],
-        #         )
-        #     ),
-        #     method_responses=[apigateway.MethodResponse(status_code='200')]
-        # )
 
         update_habit_credentials_role = iam.Role(
             self, 'cdk-update-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
         ddb_table.grant_write_data(update_habit_credentials_role)
-        # habit_resource.add_method(
-        #     'PUT',
-        #     integration=apigateway.AwsIntegration(
-        #         service='dynamodb',
-        #         action='UpdateItem',
-        #         integration_http_method='POST',
-        #         options=apigateway.IntegrationOptions(
-        #             credentials_role=update_habit_credentials_role,
-        #             request_templates={
-        #                 'application/json': f"""{{"Key": {{"PK1": {{"S": "$input.path('$.PK1.S')"}},"SK1": {{"S": "$input.path('$.SK1.S')"}}}}, "ExpressionAttributeNames":{{"#pk2":"PK2"}},"ExpressionAttributeValues":{{":pk2":{{"S":"$input.path('$.PK2.S')"}}}},"UpdateExpression": "SET #pk2 = :pk2","TableName": "{ddb_table.table_name}"}}"""
-        #             },
-        #             integration_responses=[
-        #                 apigateway.IntegrationResponse(status_code='200')
-        #             ],
-        #         )
-        #     ),
-        #     method_responses=[apigateway.MethodResponse(status_code='200')]
-        # )
 
         read_habit_credentials_role = iam.Role(
             self, 'cdk-read-habit-apig-ddb-role',
             assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
         )
         ddb_table.grant_read_data(read_habit_credentials_role)
-        # habit_resource.add_method(
-        #     'GET',
-        #     integration=apigateway.AwsIntegration(
-        #         service='dynamodb',
-        #         action='Query',
-        #         integration_http_method='POST',
-        #         options=apigateway.IntegrationOptions(
-        #             credentials_role=read_habit_credentials_role,
-        #             request_templates={
-        #                 'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"USER#$input.params('user')#HABIT"}}}}, "TableName": "{ddb_table.table_name}"}}"""
-        #             },
-        #             integration_responses=[
-        #                 apigateway.IntegrationResponse(
-        #                     status_code='200',
-        #                     response_parameters={'method.response.header.Access-Control-Allow-Origin': "'*'"}
-        #                 )
-        #             ],
-        #         )
-        #     ),
-        #     method_responses=[apigateway.MethodResponse(
-        #             status_code='200',
-        #             response_parameters={'method.response.header.Access-Control-Allow-Origin': True}
-        #         )
-        #     ]
-        # )
-
-        # query_habit_data_credentials_role = iam.Role(
-        #     self, 'cdk-query-habit-data-apig-ddb-role',
-        #     assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
-        # )
-        # ddb_table.grant_read_data(query_habit_data_credentials_role)
 
         # Query Habit Data Points for front-end
-        habit_data_resource = api.root.add_resource(
-            'habit-data',
-            default_cors_preflight_options=apigateway.CorsOptions(
-                allow_origins=apigateway.Cors.ALL_ORIGINS,
-                allow_methods=["GET", "POST"]
-            )
-        )
-
-        # habit_data_resource.add_method(
-        #     'GET',
-        #     integration=apigateway.AwsIntegration(
-        #         service='dynamodb',
-        #         action='Query',
-        #         integration_http_method='POST',
-        #         options=apigateway.IntegrationOptions(
-        #             credentials_role=query_habit_data_credentials_role,
-        #             request_templates={
-        #                 'application/json': f"""{{"KeyConditionExpression":"#pk1=:pk1", "ExpressionAttributeNames":{{"#pk1":"PK1"}}, "ExpressionAttributeValues":{{":pk1":{{"S":"USER#$input.params('user')#HABIT#$input.params('PK1')"}}}}, "ExclusiveStartKey":{{"PK1":{{"S":"USER#$input.params('user')#HABIT#$input.params('PK1')"}},"SK1":{{"S":"DATE#$input.params('startkey')"}}}},"Limit": $input.params('limit'), "ScanIndexForward": false, "TableName": "{ddb_table.table_name}"}}"""
-        #             },
-        #             integration_responses=[
-        #                 apigateway.IntegrationResponse(
-        #                     status_code='200',
-        #                     response_parameters={'method.response.header.Access-Control-Allow-Origin': "'*'"}
-        #                 )
-        #             ],
-        #         )
-        #     ),
-        #     method_responses=[apigateway.MethodResponse(
-        #             status_code='200',
-        #             response_parameters={'method.response.header.Access-Control-Allow-Origin': True}
-        #         )
-        #     ]
+        # habit_data_resource = api.root.add_resource(
+        #     'habit-data',
+        #     default_cors_preflight_options=apigateway.CorsOptions(
+        #         allow_origins=apigateway.Cors.ALL_ORIGINS,
+        #         allow_methods=["GET", "POST"]
+        #     )
         # )
+
         # LOG HABIT DATA FOR THE DAY
         log_habit_data_integration = apigateway.LambdaIntegration(
             log_habit_data_function_cdk,
             proxy=True
         )
 
-        habit_data_resource.add_method(
+        habit_survey_resource.add_method(
             'POST',
             log_habit_data_integration,
             method_responses=[{

@@ -1,20 +1,19 @@
 import os
 import json
-import ulid
 import boto3
+import sys
 
 table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
     body = json.loads(event['body'])
-    my_ulid = ulid.from_str(body['ulid'])
-    user = body['user']
+    token = body['token']
     response = ddb_client.get_item(
         TableName=table_name,
         Key={
-            'PK1': {'S': f'USER#{user}'},
-            'SK1': {'S': f'ULID#{my_ulid}'}
+            'PK1': {'S': f'MEGA_ULID#{token}'},
+            'SK1': {'S': f'MEGA_ULID#{token}'}
         }
     )
     if 'Item' not in response:
@@ -30,26 +29,21 @@ def lambda_handler(event, context):
             },
             'body': json.dumps(response_body)
         }
-    entry_datetime = my_ulid.timestamp().datetime
-    mm = f'{entry_datetime.month:02}'
-    dd = f'{entry_datetime.day:02}'
-    yyyy = entry_datetime.year
-    print(f'{body=}')
+    item = response['Item']
+    date = item['DATE_STRING']['S']
+    user = item['USER']['S'][len('USER#'):]
     for habit_name in body['data_points']:
-        print(f'{habit_name=}')
-        print(f'DATE#{yyyy}-{mm}-{dd}')
         level = body['data_points'][habit_name] - 1
         count = body['data_points'][habit_name] - 1
         response = ddb_client.put_item(
             TableName=table_name,
             Item={
                 'PK1': {'S': f'USER#{user}#HABIT#{habit_name}'},
-                'SK1': {'S': f'DATE#{yyyy}-{mm}-{dd}'},
+                'SK1': {'S': f'DATE#{date}'},
                 'DATE_COUNT': {'S': str(count)},
                 'DATE_LEVEL': {'S': str(level)}
             }
         )
-        print(f'{response=}')
     response_body = {'shalom': 'haverim!'}
     response_code = 200
     response = {

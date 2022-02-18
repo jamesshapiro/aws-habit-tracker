@@ -1,14 +1,21 @@
 High:
 [ ] add a "create habit" front-end
-[ ] Fix survey issue
+[ ] Fix survey issues
 [ ] Create backend for ULID token that retrieves habits
 
 Medium:
+[ ] Format HTML email
 [ ] Fix font on survey header
+[ ] Only show log-in or sign-out buttons when appropriate
 [ ] Add display name field for habits
 [ ] auto-configure Cognito domain from CDK
 [ ] log and check unsubscriptions
 [ ] write an unsubscriber function
+[ ] halve the left-margin for mobile view
+[ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
+[ ] also consider just SHA-256-ing a long random value for the token
+[ ] add "request survey" functionality
+[ ] rename "mega_ulid" to "token"
 
 Low:
 [ ] Sort survey items by priority

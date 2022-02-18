@@ -1,10 +1,8 @@
 //aws cloudfront create-invalidation --distribution-id E2I2LGCAG9S89X --paths "/*"
 //aws s3 cp --recursive build/ s3://cdkhabits-habitssurveyweakerpotionscombucket15fc8-19lebhcy753i2
-import logo from './logo.svg';
 import './App.css'
 import React from 'react'
 import * as Survey from 'survey-react'
-import * as ulid from 'ulid'
 
 class App extends React.Component {
   constructor(props) {
@@ -21,11 +19,13 @@ class App extends React.Component {
     title.charAt(0).toLowerCase() + title.replaceAll(' ', '-').slice(1)
 
   getHabits = () => {
+    console.log('Getting Habits')
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })
-    const user = params.user
-    const url = process.env.REACT_APP_GET_HABITS_URL + `?user=${user}`
+    console.log(params)
+    const mega_ulid = params.mega_ulid
+    const url = process.env.REACT_APP_SURVEY_URL + `?mega_ulid=${mega_ulid}`
     fetch(url, {
       method: 'GET',
     })
@@ -65,6 +65,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    console.log('mounting...')
     this.getHabits()
   }
 
@@ -72,7 +73,7 @@ class App extends React.Component {
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })
-    const my_ulid = params.ulid
+    const my_ulid = params.mega_ulid
     const user = params.user
     const data = {}
     const surveyData = survey.data
@@ -81,8 +82,8 @@ class App extends React.Component {
       const habitId = this.getHabitId(surveyKey)
       data.data_points[habitId] = surveyData[surveyKey]
     })
-    const url = process.env.REACT_APP_GET_HABIT_DATA_URL
-    data.ulid = my_ulid
+    const url = process.env.REACT_APP_SURVEY_URL
+    data.token = my_ulid
     data.user = user
     fetch(url, {
       method: 'POST',
@@ -98,12 +99,12 @@ class App extends React.Component {
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })
-    let my_ulid = params.ulid
-    let s_time = ulid.decodeTime(my_ulid)
-    let date = new Date(s_time)
-    const dd = String(date.getDate())
-    const mm = String(date.getMonth() + 1)
-    const yyyy = date.getFullYear()
+    let date_string = params.date_string
+    // let s_time = ulid.decodeTime(my_ulid)
+    // let date = new Date(s_time)
+    const dd = date_string.slice(-2)
+    const mm = date_string.slice(5,7)
+    const yyyy = date_string.slice(0, 4)
     return (
       <div className="App">
         <h1 className="habit-title">
