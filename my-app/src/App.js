@@ -28,7 +28,139 @@ class App extends React.Component {
       isMounted: false,
       isLoginPage: false,
       isInEditHabitsMode: false,
+      newHabit: '',
     }
+  }
+
+  handleChange(i, event) {
+    let habits = [...this.state.habits]
+    habits[i] = event.target.value
+    this.setState({ newHabit: event.target.value })
+  }
+
+  get_pk1_habit_name(habitName) {
+    return habitName.toLowerCase().split(/\s+/).join('-')
+  }
+
+  addClick = () => {
+    let habits = [...this.state.habits]
+    let newHabit = this.state.newHabit
+    habits.push({
+      habitName: this.get_pk1_habit_name(newHabit),
+      habitDisplayName: newHabit,
+      habitColor: '#b92514',
+      habitPriority: 0,
+    })
+    if (newHabit.length > 2) {
+      this.setState({ newHabit: '', habits })
+    }
+  }
+
+  removeClick(i) {
+    let values = [...this.state.habits]
+    values[i].deletePlanned = true
+    // values.splice(i, 1)
+    this.setState({ habits: values })
+  }
+
+  unremoveClick(i) {
+    let values = [...this.state.habits]
+    values[i].deletePlanned = false
+    this.setState({ habits: values })
+  }
+
+  handleSubmit = (event) => {
+    Auth.currentAuthenticatedUser()
+      .then((user) => {
+        console.log('submitting...')
+        const token = user.signInUserSession.idToken.jwtToken
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        }
+        event.preventDefault()
+        const url = process.env.REACT_APP_GET_HABITS_AUTH_URL
+        const data = this.state.habits
+        fetch(url, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(data),
+        }).then((response) => {
+          this.setState({
+            entries: [],
+            exclusiveStartKey: '',
+            showEntries: true,
+            values: [''],
+          })
+          this.getNewEntries()
+        })
+        // event.currentTarget.reset()
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
+  createUI = () => {
+    return (
+      <table>
+        <tbody>
+          {this.state.habits.map((el, i) => (
+            <tr key={i}>
+              <td className="td-existing-habit">
+                <div>
+                  {el.deletePlanned ? (
+                    <span className="to-delete">{el.habitDisplayName}</span>
+                  ) : (
+                    el.habitDisplayName
+                  )}
+                </div>
+              </td>
+              <td className="td-button">
+                {el.deletePlanned ? (
+                  <div
+                    type="button"
+                    className="bullet-button"
+                    onClick={this.unremoveClick.bind(this, i)}
+                  >
+                    ➕
+                  </div>
+                ) : (
+                  <div
+                    type="button"
+                    className="bullet-button"
+                    onClick={this.removeClick.bind(this, i)}
+                  >
+                    ❌
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+          <tr key={this.state.habits.length}>
+            <td className="td-textarea">
+              <input
+                placeholder={'Ex. "Get 8+ hours of sleep"'}
+                className="bullet-textarea"
+                onChange={this.handleChange.bind(
+                  this,
+                  this.state.habits.length
+                )}
+              />
+            </td>
+            <td className="td-button">
+              <div
+                type="button"
+                className="bullet-button"
+                onClick={this.addClick.bind(this)}
+              >
+                ➕
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    )
   }
 
   enterEditHabitsMode = () => {
@@ -56,18 +188,14 @@ class App extends React.Component {
         })
           .then((response) => response.json())
           .then((data) => {
-            const habitItems = data.Items.map((item) => {
+            const habitItems = data.map((item) => {
               return {
+                habitDisplayName: item.DISPLAY_NAME.S,
                 habitName: item.SK1.S.slice(6),
                 habitColor: item.COLOR.S,
-                habitPriority: item.hasOwnProperty('PRIORITY')
-                  ? parseInt(item.PRIORITY.S)
-                  : 0,
+                habitPriority: parseInt(item.PRIORITY.S),
               }
             })
-            habitItems.sort(
-              (habit1, habit2) => habit2.habitPriority - habit1.habitPriority
-            )
             var newState = {
               habits: [...habitItems],
               isMounted: true,
@@ -118,25 +246,18 @@ class App extends React.Component {
     return (
       <div className="habit-graphs">
         {this.state.habits.map((habit) => {
-          return (
-            <Habit habitName={habit.habitName} habitColor={habit.habitColor} />
-          )
+          return <Habit habit={habit} />
         })}
       </div>
     )
   }
 
   getEditHabitsUI = () => {
-    console.log(this.state.habits)
     return (
-      <div className="habit-graphs">
-        {this.state.habits.map((habit) => {
-          return (
-            // <Habit habitName={habit.habitName} habitColor={habit.habitColor} />
-            <li>{habit.habitName}</li>
-          )
-        })}
-      </div>
+      <form onSubmit={this.handleSubmit}>
+        {this.createUI()}
+        <input type="submit" value="Submit" />
+      </form>
     )
   }
 
@@ -190,12 +311,10 @@ class App extends React.Component {
           <h1 className="habit-h1">{}</h1>
           {this.state.isMounted &&
             !this.state.isInEditHabitsMode &&
-            this.getHabitGraphs()
-          }
+            this.getHabitGraphs()}
           {this.state.isMounted &&
             this.state.isInEditHabitsMode &&
-            this.getEditHabitsUI()
-          }
+            this.getEditHabitsUI()}
         </div>
       </div>
     )

@@ -12,6 +12,7 @@ class App extends React.Component {
       isMounted: false,
     }
   }
+
   getTitle = (habitName) =>
     habitName.charAt(0).toUpperCase() + habitName.replaceAll('-', ' ').slice(1)
 
@@ -33,7 +34,9 @@ class App extends React.Component {
         const habitItems = data.Items.map((item) => {
           return item.SK1.S.slice(6)
         })
-        const nonGitHubItems = habitItems.filter(item => !item.toLowerCase().includes('github'))
+        const nonGitHubItems = habitItems.filter(
+          (item) => !item.toLowerCase().includes('github')
+        )
         var newState = { habits: [...nonGitHubItems], isMounted: true }
         this.setState(newState)
       })
@@ -58,7 +61,7 @@ class App extends React.Component {
         isRequired: true,
         randomprop: 'randomprop',
         minRateDescription: 'Awful',
-        maxRateDescription: 'Great'
+        maxRateDescription: 'Great',
       }
     })
   }
@@ -98,7 +101,7 @@ class App extends React.Component {
     let date_string = params.date_string
     console.log(date_string)
     const dd = date_string.slice(-2)
-    const mm = date_string.slice(5,7)
+    const mm = date_string.slice(5, 7)
     const yyyy = date_string.slice(0, 4)
     return (
       <div className="App">
@@ -114,6 +117,7 @@ class App extends React.Component {
             />
           </div>
         )}
+      <div className='survey-footer'></div>
       </div>
     )
   }

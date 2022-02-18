@@ -250,19 +250,7 @@ class CdkHabitTrackerStack(Stack):
             },
             timeout=Duration.seconds(30),
         )
-        ddb_table.grant_write_data(get_habit_survey_function_cdk)
-
-        delete_habit_auth_function_cdk = lambda_.Function(
-            self, 'DeleteHabitCDK',
-            runtime=lambda_.Runtime.PYTHON_3_9,
-            code=lambda_.Code.from_asset('functions'),
-            handler='habit_auth_delete.lambda_handler',
-            environment={
-                'DDB_TABLE': ddb_table.table_name
-            },
-            timeout=Duration.seconds(30),
-        )
-        ddb_table.grant_write_data(get_habit_survey_function_cdk)
+        ddb_table.grant_write_data(post_habit_auth_function_cdk)
 
         # GET HABIT AUTH FUNCTIONS
         get_habit_auth_integration = apigateway.LambdaIntegration(
@@ -273,10 +261,7 @@ class CdkHabitTrackerStack(Stack):
             post_habit_auth_function_cdk,
             proxy=True
         )
-        delete_habit_auth_integration = apigateway.LambdaIntegration(
-            delete_habit_auth_function_cdk,
-            proxy=True
-        )
+
         get_habit_data_auth_integration = apigateway.LambdaIntegration(
             get_habit_data_auth_function_cdk,
             proxy=True
@@ -325,14 +310,14 @@ class CdkHabitTrackerStack(Stack):
 
         #######################################################################
 
-        log_habit_data_integration = apigateway.LambdaIntegration(
+        post_habit_data_integration = apigateway.LambdaIntegration(
             post_habit_data_function_cdk,
             proxy=True
         )
 
         habit_survey_resource.add_method(
             'POST',
-            log_habit_data_integration,
+            post_habit_data_integration,
             method_responses=[{
                 'statusCode': '200',
                 'responseParameters': {
@@ -349,18 +334,9 @@ class CdkHabitTrackerStack(Stack):
                 'responseParameters': {
                     'method.response.header.Access-Control-Allow-Origin': True,
                 }
-            }]
-        )
-
-        habit_auth_resource.add_method(
-            'DELETE',
-            delete_habit_auth_integration,
-            method_responses=[{
-                'statusCode': '200',
-                'responseParameters': {
-                    'method.response.header.Access-Control-Allow-Origin': True,
-                }
-            }]
+            }],
+            authorizer=auth,
+            authorization_type=apigateway.AuthorizationType.COGNITO
         )
 
         # HABIT TRACKER / SURVEY WEBSITES

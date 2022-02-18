@@ -96,7 +96,7 @@ class Habit extends Component {
     const yyyy = tomorrow.getFullYear()
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
     const numDaysToFetchFromDDB = 373
-    var daysOfYear = this.getDaysOfYear(user, this.props.habitName)
+    var daysOfYear = this.getDaysOfYear(user, this.props.habit.habitName)
     if (user !== 'display') {
       const username = user.attributes.email.replace('@', '%40')
       const token = user.signInUserSession.idToken.jwtToken
@@ -106,7 +106,7 @@ class Habit extends Component {
       }
       var url =
         process.env.REACT_APP_GET_HABIT_DATA_AUTH_URL +
-        `?user=${username}&PK1=${this.props.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
+        `?user=${username}&PK1=${this.props.habit.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
       
       fetch(url, {
         method: 'GET',
@@ -155,12 +155,9 @@ class Habit extends Component {
     this.getNewEntries()
   }
 
-  getTitle = (habitName) =>
-    habitName.charAt(0).toUpperCase() + habitName.replaceAll('-', ' ').slice(1)
-
   render() {
     const numDaysToFetch = this.getNumDaysToFetch()
-    const mytheme = this.props.habitName.toLowerCase().includes('github')
+    const mytheme = this.props.habit.habitName.toLowerCase().includes('github')
       ? {
           level0: '#EBEDF0',
           level1: '#9BE9A8',
@@ -172,11 +169,11 @@ class Habit extends Component {
 
     return (
       <div className="habit">
-        <h3 className="habit-title">{this.getTitle(this.props.habitName)}</h3>
+        <h3 className="habit-title">{this.props.habit.habitDisplayName}</h3>
         <div className="commit-graph">
           {this.state.isMounted && (
             <ActivityCalendar
-              color={this.props.habitColor}
+              color={this.props.habit.habitColor}
               data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
               hideColorLegend={false}
               hideTotalCount={true}

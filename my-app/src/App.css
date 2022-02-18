@@ -3,6 +3,18 @@
   width: 95%;
 }
 
+.to-delete {
+  text-decoration: line-through;
+}
+
+.td-existing-habit {
+  background-color: lightgray;
+}
+
+.bullet-button {
+  cursor: pointer;
+}
+
 .commit-graph {
   margin-left: 50px;
 }

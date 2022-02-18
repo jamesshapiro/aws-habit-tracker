@@ -11,6 +11,7 @@ Medium:
 [ ] also consider just SHA-256-ing a long random value for the token
 [ ] add "request survey" functionality
 [ ] rename "mega_ulid" to "token"
+[ ] remove get query param if it is unnecessary
 
 Low:
 [ ] Sort survey items by priority

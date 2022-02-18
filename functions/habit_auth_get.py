@@ -14,7 +14,8 @@ def lambda_handler(event, context):
         ExpressionAttributeNames={'#pk1':'PK1'},
         ExpressionAttributeValues={':pk1':{'S':f'USER#{email}#HABIT'}}
     )
-    response_body = response
+    response_body = response['Items']
+    response_body = sorted(response_body, key=lambda x: int(x['PRIORITY']['S']), reverse=True)
     response_code = 200
     response = {
         'statusCode': response_code,
