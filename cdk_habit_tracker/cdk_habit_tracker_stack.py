@@ -92,11 +92,11 @@ class CdkHabitTrackerStack(Stack):
             compatible_architectures=[lambda_.Architecture.X86_64]
         )
 
-        send_habit_survey_function_cdk = lambda_.Function(
-            self, 'SendHabitSurveyCDK',
+        email_habit_survey_function_cdk = lambda_.Function(
+            self, 'EmailHabitSurveyCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
             code=lambda_.Code.from_asset('functions'),
-            handler='send_habit_survey.lambda_handler',
+            handler='email_habit_survey.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name,
                 'USER_POOL_ID': user_pool.user_pool_id
@@ -105,7 +105,7 @@ class CdkHabitTrackerStack(Stack):
             layers=[ulid_layer]
         )
 
-        send_habit_survey_policy = iam.Policy(
+        email_habit_survey_policy = iam.Policy(
             self, 'cdk-habits-cognito-list-users',
             statements=[
                 iam.PolicyStatement(
@@ -118,20 +118,20 @@ class CdkHabitTrackerStack(Stack):
                 )
             ]
         )
-        send_habit_survey_function_cdk.role.attach_inline_policy(send_habit_survey_policy)
+        email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
 
-        lambda_target = targets.LambdaFunction(send_habit_survey_function_cdk)
+        lambda_target = targets.LambdaFunction(email_habit_survey_function_cdk)
         
         events.Rule(self, "ScheduleRule",
             schedule=events.Schedule.cron(minute="0", hour="4"),
             targets=[lambda_target]
         )
 
-        log_habit_data_function_cdk = lambda_.Function(
-            self, 'LogHabitDataCDK',
+        post_habit_data_function_cdk = lambda_.Function(
+            self, 'HabitDataPostCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
             code=lambda_.Code.from_asset('functions'),
-            handler='log_habit_data.lambda_handler',
+            handler='habit_data_auth_post.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
@@ -157,13 +157,13 @@ class CdkHabitTrackerStack(Stack):
                 'body': {'habits_user':email, 'github_user': 'jamesshapiro'}
             })
         )
-        github_fetch_cron_rule = events.Rule(self, "GitHubFetchScheduleRule",
+        events.Rule(self, "GitHubFetchScheduleRule",
             schedule=events.Schedule.cron(minute="0", hour="4"),
             targets=[fetch_github_target]
         )
 
-        ddb_table.grant_read_write_data(log_habit_data_function_cdk)
-        ddb_table.grant_read_write_data(send_habit_survey_function_cdk)
+        ddb_table.grant_read_write_data(post_habit_data_function_cdk)
+        ddb_table.grant_read_write_data(email_habit_survey_function_cdk)
         ddb_table.grant_write_data(fetch_github_data_function_cdk)
 
         api = apigateway.RestApi(
@@ -184,7 +184,7 @@ class CdkHabitTrackerStack(Stack):
             'habit-auth',
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
-                allow_methods=["GET", "POST"]
+                allow_methods=["GET", "POST", "DELETE"]
             )
         )
 
@@ -204,23 +204,23 @@ class CdkHabitTrackerStack(Stack):
             )
         )
 
-        get_habit_auth_function_cdk = lambda_.Function(
+        get_habit_function_cdk = lambda_.Function(
             self, 'GetHabitAuthCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
             code=lambda_.Code.from_asset('functions'),
-            handler='get_habit_auth.lambda_handler',
+            handler='habit_auth_get.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
             timeout=Duration.seconds(30),
         )
-        ddb_table.grant_read_data(get_habit_auth_function_cdk)
+        ddb_table.grant_read_data(get_habit_function_cdk)
 
         get_habit_data_auth_function_cdk = lambda_.Function(
             self, 'GetHabitDataAuthCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
             code=lambda_.Code.from_asset('functions'),
-            handler='get_habit_data_auth.lambda_handler',
+            handler='habit_data_auth_get.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
@@ -232,7 +232,7 @@ class CdkHabitTrackerStack(Stack):
             self, 'GetHabitSurveyCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
             code=lambda_.Code.from_asset('functions'),
-            handler='get_habit_survey.lambda_handler',
+            handler='habit_survey_get.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name
             },
@@ -240,9 +240,41 @@ class CdkHabitTrackerStack(Stack):
         )
         ddb_table.grant_read_data(get_habit_survey_function_cdk)
 
+        post_habit_auth_function_cdk = lambda_.Function(
+            self, 'PostHabitCDK',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('functions'),
+            handler='habit_auth_post.lambda_handler',
+            environment={
+                'DDB_TABLE': ddb_table.table_name
+            },
+            timeout=Duration.seconds(30),
+        )
+        ddb_table.grant_write_data(get_habit_survey_function_cdk)
+
+        delete_habit_auth_function_cdk = lambda_.Function(
+            self, 'DeleteHabitCDK',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('functions'),
+            handler='habit_auth_delete.lambda_handler',
+            environment={
+                'DDB_TABLE': ddb_table.table_name
+            },
+            timeout=Duration.seconds(30),
+        )
+        ddb_table.grant_write_data(get_habit_survey_function_cdk)
+
         # GET HABIT AUTH FUNCTIONS
         get_habit_auth_integration = apigateway.LambdaIntegration(
-            get_habit_auth_function_cdk,
+            get_habit_function_cdk,
+            proxy=True
+        )
+        post_habit_auth_integration = apigateway.LambdaIntegration(
+            post_habit_auth_function_cdk,
+            proxy=True
+        )
+        delete_habit_auth_integration = apigateway.LambdaIntegration(
+            delete_habit_auth_function_cdk,
             proxy=True
         )
         get_habit_data_auth_integration = apigateway.LambdaIntegration(
@@ -293,48 +325,36 @@ class CdkHabitTrackerStack(Stack):
 
         #######################################################################
 
-        create_habit_credentials_role = iam.Role(
-            self, 'cdk-create-habit-apig-ddb-role',
-            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
-        )
-        ddb_table.grant_write_data(create_habit_credentials_role)
-
-        delete_habit_credentials_role = iam.Role(
-            self, 'cdk-delete-habit-apig-ddb-role',
-            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
-        )
-        ddb_table.grant_full_access(delete_habit_credentials_role)
-
-        update_habit_credentials_role = iam.Role(
-            self, 'cdk-update-habit-apig-ddb-role',
-            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
-        )
-        ddb_table.grant_write_data(update_habit_credentials_role)
-
-        read_habit_credentials_role = iam.Role(
-            self, 'cdk-read-habit-apig-ddb-role',
-            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com'),
-        )
-        ddb_table.grant_read_data(read_habit_credentials_role)
-
-        # Query Habit Data Points for front-end
-        # habit_data_resource = api.root.add_resource(
-        #     'habit-data',
-        #     default_cors_preflight_options=apigateway.CorsOptions(
-        #         allow_origins=apigateway.Cors.ALL_ORIGINS,
-        #         allow_methods=["GET", "POST"]
-        #     )
-        # )
-
-        # LOG HABIT DATA FOR THE DAY
         log_habit_data_integration = apigateway.LambdaIntegration(
-            log_habit_data_function_cdk,
+            post_habit_data_function_cdk,
             proxy=True
         )
 
         habit_survey_resource.add_method(
             'POST',
             log_habit_data_integration,
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': True,
+                }
+            }]
+        )
+
+        habit_auth_resource.add_method(
+            'POST',
+            post_habit_auth_integration,
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': True,
+                }
+            }]
+        )
+
+        habit_auth_resource.add_method(
+            'DELETE',
+            delete_habit_auth_integration,
             method_responses=[{
                 'statusCode': '200',
                 'responseParameters': {

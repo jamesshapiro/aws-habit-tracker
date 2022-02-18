@@ -1,11 +1,8 @@
 High:
 [ ] add a "create habit" front-end
-[ ] Fix survey issues
-[ ] Create backend for ULID token that retrieves habits
 
 Medium:
 [ ] Format HTML email
-[ ] Fix font on survey header
 [ ] Add display name field for habits
 [ ] auto-configure Cognito domain from CDK
 [ ] log and check unsubscriptions
@@ -43,3 +40,6 @@ Low:
 [x] secure backend APIs with Cognito
 [x] Only show log-in or sign-out buttons when appropriate
 [x] halve the left-margin for mobile view
+[x] Fix font on survey header
+[x] Fix survey issues
+[x] Create backend for ULID token that retrieves habits

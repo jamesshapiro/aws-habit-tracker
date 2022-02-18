@@ -102,10 +102,10 @@ class App extends React.Component {
     const yyyy = date_string.slice(0, 4)
     return (
       <div className="App">
-        <h1 className="habit-title">
+        <h2 className="habit-title">
           {' '}
-          Rate {mm}-{dd}-{yyyy} from 1 (awful) to 5 (great){' '}
-        </h1>
+          Rate your tenacity on {mm}-{dd}-{yyyy}
+        </h2>
         {this.state.isMounted && (
           <div className="enclose">
             <Survey.Survey
