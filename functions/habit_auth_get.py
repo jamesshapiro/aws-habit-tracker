@@ -6,7 +6,6 @@ table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
-    # print(f'{event=}')
     email = event['requestContext']['authorizer']['claims']['email']
     response = ddb_client.query(
         TableName=table_name,

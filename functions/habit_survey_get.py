@@ -7,15 +7,14 @@ ddb_client = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
     query_string_parameters = event['queryStringParameters']
-    mega_ulid = query_string_parameters['mega_ulid']
+    token = query_string_parameters['token']
     response = ddb_client.get_item(
         TableName=table_name,
         Key={
-            'PK1': {'S': f'MEGA_ULID#{mega_ulid}'},
-            'SK1': {'S': f'MEGA_ULID#{mega_ulid}'}
+            'PK1': {'S': f'TOKEN'},
+            'SK1': {'S': f'TOKEN#{token}'}
         }
     )
-    #print(f'{response=}')
     item = response['Item']
     user = item['USER']['S'][len('USER#'):]
     response = ddb_client.query(
@@ -25,7 +24,8 @@ def lambda_handler(event, context):
         ExpressionAttributeValues={':pk1':{'S':f'USER#{user}#HABIT'}}
     )
     #print(f'{response=}')
-    response_body = response
+    response_body = response['Items']
+    response_body = sorted(response_body, key=lambda x: int(x['PRIORITY']['S']), reverse=True)
     response_code = 200
     response = {
         'statusCode': response_code,

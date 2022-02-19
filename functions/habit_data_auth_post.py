@@ -12,8 +12,8 @@ def lambda_handler(event, context):
     response = ddb_client.get_item(
         TableName=table_name,
         Key={
-            'PK1': {'S': f'MEGA_ULID#{token}'},
-            'SK1': {'S': f'MEGA_ULID#{token}'}
+            'PK1': {'S': f'TOKEN'},
+            'SK1': {'S': f'TOKEN#{token}'}
         }
     )
     if 'Item' not in response:

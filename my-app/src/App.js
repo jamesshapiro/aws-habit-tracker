@@ -94,7 +94,6 @@ class App extends React.Component {
           })
           this.getNewEntries()
         })
-        // event.currentTarget.reset()
       })
       .catch((err) => {
         console.log(err)
@@ -174,14 +173,12 @@ class App extends React.Component {
   getNewEntries = () => {
     Auth.currentAuthenticatedUser()
       .then((user) => {
-        const username = user.attributes.email.replace('@', '%40')
         const token = user.signInUserSession.idToken.jwtToken
         const headers = {
           'Content-Type': 'application/json',
           Authorization: token,
         }
-        var url =
-          process.env.REACT_APP_GET_HABITS_AUTH_URL + `?user=${username}`
+        const url = process.env.REACT_APP_GET_HABITS_AUTH_URL
         fetch(url, {
           method: 'GET',
           headers: headers,
@@ -196,7 +193,7 @@ class App extends React.Component {
                 habitPriority: parseInt(item.PRIORITY.S),
               }
             })
-            var newState = {
+            const newState = {
               habits: [...habitItems],
               isMounted: true,
               isLoginPage: false,
@@ -208,26 +205,31 @@ class App extends React.Component {
         const habits = [
           {
             habitName: 'clean-for-10m',
+            habitDisplayName: 'Clean for 10m',
             habitColor: '#b92514',
             habitPriority: 100,
           },
           {
             habitName: 'get-8h-of-sleep',
+            habitDisplayName: 'Get 8h of sleep',
             habitColor: '#2270A1',
             habitPriority: 99,
           },
           {
             habitName: 'stay-hydrated',
+            habitDisplayName: 'Stay Hydrated',
             habitColor: '#1e4500',
             habitPriority: 98,
           },
           {
             habitName: 'read-for-30m',
+            habitDisplayName: 'Read for 30m',
             habitColor: '#b92514',
             habitPriority: 97,
           },
           {
             habitName: 'exercise',
+            habitDisplayName: 'Exercise',
             habitColor: '#2270A1',
             habitPriority: 96,
           },

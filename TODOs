@@ -1,22 +1,23 @@
 High:
-[ ] add a "create habit" front-end
+[ ] Migrate to githabit.com
 
 Medium:
 [ ] Format HTML email
-[ ] Add display name field for habits
-[ ] auto-configure Cognito domain from CDK
+
 [ ] log and check unsubscriptions
-[ ] write an unsubscriber function
 [ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
-[ ] also consider just SHA-256-ing a long random value for the token
+[ ] write an unsubscriber function
 [ ] add "request survey" functionality
-[ ] rename "mega_ulid" to "token"
-[ ] remove get query param if it is unnecessary
+[ ] Add other fields to add-habit UI aside from habit name
+[ ] Add purge user functionality
+[ ] Add TTL field for tokens
+[ ] Fix header button display to be less ugly
+[ ] show "day-of" results
 
 Low:
-[ ] Sort survey items by priority
 [ ] add tooltip to display count
 [ ] add square comments
+[ ] auto-configure Cognito domain from CDK
 
 ======================================================
 [x] Implement reminder form w/ token
@@ -44,3 +45,10 @@ Low:
 [x] Fix font on survey header
 [x] Fix survey issues
 [x] Create backend for ULID token that retrieves habits
+[x] Add display name field for habits
+[x] add a "create habit" front-end
+[x] Sort survey items by priority
+[x] remove get query param if it is unnecessary
+[x] rename "mega_ulid" to "token"
+[x] also consider just SHA-256-ing a long random value for the token
+[x] use "display name" in survey

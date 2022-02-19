@@ -13,29 +13,25 @@ class App extends React.Component {
     }
   }
 
-  getTitle = (habitName) =>
-    habitName.charAt(0).toUpperCase() + habitName.replaceAll('-', ' ').slice(1)
-
-  getHabitId = (title) =>
-    title.charAt(0).toLowerCase() + title.replaceAll(' ', '-').slice(1)
+  getHabitId = (habitName) => habitName.toLowerCase().split(/\s+/).join('-')
 
   getHabits = () => {
     console.log('Getting Habits')
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })
-    const mega_ulid = params.mega_ulid
-    const url = process.env.REACT_APP_SURVEY_URL + `?mega_ulid=${mega_ulid}`
+    const token = params.token
+    const url = process.env.REACT_APP_SURVEY_URL + `?token=${token}`
     fetch(url, {
       method: 'GET',
     })
       .then((response) => response.json())
       .then((data) => {
-        const habitItems = data.Items.map((item) => {
-          return item.SK1.S.slice(6)
+        const habitItems = data.map((item) => {
+          return item
         })
         const nonGitHubItems = habitItems.filter(
-          (item) => !item.toLowerCase().includes('github')
+          (item) => !item.DISPLAY_NAME.S.toLowerCase().includes('github')
         )
         var newState = { habits: [...nonGitHubItems], isMounted: true }
         this.setState(newState)
@@ -55,9 +51,10 @@ class App extends React.Component {
 
   getSurvey = () => {
     return this.state.habits.map((habit) => {
+      console.log(habit)
       return {
         type: 'rating',
-        name: this.getTitle(habit),
+        name: habit.DISPLAY_NAME.S,
         isRequired: true,
         randomprop: 'randomprop',
         minRateDescription: 'Awful',
@@ -67,7 +64,6 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    console.log('mounting...')
     this.getHabits()
   }
 
@@ -75,8 +71,7 @@ class App extends React.Component {
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })
-    const my_ulid = params.mega_ulid
-    const user = params.user
+    const token = params.token
     const data = {}
     const surveyData = survey.data
     data.data_points = {}
@@ -85,8 +80,7 @@ class App extends React.Component {
       data.data_points[habitId] = surveyData[surveyKey]
     })
     const url = process.env.REACT_APP_SURVEY_URL
-    data.token = my_ulid
-    data.user = user
+    data.token = token
     fetch(url, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -99,7 +93,6 @@ class App extends React.Component {
       get: (searchParams, prop) => searchParams.get(prop),
     })
     let date_string = params.date_string
-    console.log(date_string)
     const dd = date_string.slice(-2)
     const mm = date_string.slice(5, 7)
     const yyyy = date_string.slice(0, 4)
@@ -117,7 +110,7 @@ class App extends React.Component {
             />
           </div>
         )}
-      <div className='survey-footer'></div>
+        <div className="survey-footer"></div>
       </div>
     )
   }

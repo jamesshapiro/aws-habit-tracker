@@ -27,8 +27,7 @@ class CdkHabitTrackerStack(Stack):
         with open('.cdk-params') as f:
             lines = f.read().splitlines()
             # .cdk-params should be of the form:
-            # account_id=12345678901234
-            phone_number = [line for line in lines if line.startswith('phone_number')][0].split('=')[1]
+            # email=john@example.com
             email = [line for line in lines if line.startswith('email')][0].split('=')[1]
             habits_subdomain_name = [line for line in lines if line.startswith('habits_subdomain_name')][0].split('=')[1]
             habits_survey_subdomain_name = [line for line in lines if line.startswith('habits_survey_subdomain_name')][0].split('=')[1]
@@ -77,13 +76,6 @@ class CdkHabitTrackerStack(Stack):
         )
 
         CfnOutput(self, f'habits-ddb-table-name', value=ddb_table.table_name)
-        ulid_layer = lambda_.LayerVersion(
-            self,
-            'Ulid3839Layer',
-            removal_policy=cdk.RemovalPolicy.DESTROY,
-            code=lambda_.Code.from_asset('layers/ulid-python3839.zip'),
-            compatible_architectures=[lambda_.Architecture.X86_64]
-        )
         scrape_layer = lambda_.LayerVersion(
             self,
             'Scrape39Layer',
@@ -101,8 +93,7 @@ class CdkHabitTrackerStack(Stack):
                 'DDB_TABLE': ddb_table.table_name,
                 'USER_POOL_ID': user_pool.user_pool_id
             },
-            timeout=Duration.minutes(15),
-            layers=[ulid_layer]
+            timeout=Duration.minutes(15)
         )
 
         email_habit_survey_policy = iam.Policy(
