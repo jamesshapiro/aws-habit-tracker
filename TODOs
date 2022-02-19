@@ -3,14 +3,13 @@ High:
 
 Medium:
 [ ] Format HTML email
+[ ] Fix header button display to be less ugly
+[ ] add title to page
 [ ] log and check unsubscriptions
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
 [ ] Add purge user functionality
-[ ] Add TTL field for tokens
-[ ] Fix header button display to be less ugly
-[ ] add title to page
 
 Low:
 [ ] add tooltip to display count
@@ -52,3 +51,4 @@ Low:
 [x] also consider just SHA-256-ing a long random value for the token
 [x] use "display name" in survey
 [x] show "day-of" results
+[x] Add TTL field for tokens

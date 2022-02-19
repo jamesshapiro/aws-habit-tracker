@@ -44,7 +44,7 @@ def lambda_handler(event, context):
         year = str(now.year)
         day = str(now.day).zfill(2)
         month = str(now.month).zfill(2)
-        message = f'habits-survey.weakerpotions.com/?token={sha256}&date_string={year}-{month}-{day}'
+        survey_link = f'habits-survey.weakerpotions.com/?token={sha256}&date_string={year}-{month}-{day}'
         ddb_client.put_item(
             TableName=table_name,
             Item={
@@ -57,7 +57,7 @@ def lambda_handler(event, context):
         )
 
         response = ses_client.send_email(
-            Source= f'Habit Survey <{sender}>',
+            Source= f'GitHabit.com <{sender}>',
             Destination={
                 'ToAddresses': [
                     user
@@ -65,11 +65,11 @@ def lambda_handler(event, context):
             },
             Message={
                 'Subject': {
-                    'Data': f'HABITS SURVEY: {month}-{day}-{year}'
+                    'Data': f'Habits Survey: {month}-{day}-{year}'
                 },
                 'Body': {
-                    'Text': {
-                        'Data': message
+                    'Html': {
+                        'Data': f"""<html><h3>Today's Habit Survey!</h3><p>Click <a href="{survey_link}">here</a> to fill it out. The link will work for a few days, so make sure to use it before time runs out! You may have to wait up to 24 hours for results to appear."""
                     }
                 }
             }
