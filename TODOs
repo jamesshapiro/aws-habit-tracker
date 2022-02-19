@@ -3,19 +3,18 @@ High:
 
 Medium:
 [ ] Format HTML email
-
 [ ] log and check unsubscriptions
-[ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
 [ ] Add purge user functionality
 [ ] Add TTL field for tokens
 [ ] Fix header button display to be less ugly
-[ ] show "day-of" results
+[ ] add title to page
 
 Low:
 [ ] add tooltip to display count
+[ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
 [ ] add square comments
 [ ] auto-configure Cognito domain from CDK
 
@@ -52,3 +51,4 @@ Low:
 [x] rename "mega_ulid" to "token"
 [x] also consider just SHA-256-ing a long random value for the token
 [x] use "display name" in survey
+[x] show "day-of" results

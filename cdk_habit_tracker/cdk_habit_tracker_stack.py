@@ -38,7 +38,9 @@ class CdkHabitTrackerStack(Stack):
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
             sort_key=dynamodb.Attribute(name='SK1', type=dynamodb.AttributeType.STRING),
-            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            time_to_live_attribute='TTL_EXPIRATION',
+            removal_policy=cdk.RemovalPolicy.RETAIN
         )
 
         user_pool = cognito.UserPool(

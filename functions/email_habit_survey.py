@@ -4,6 +4,7 @@ import boto3
 import datetime
 import hashlib
 import secrets
+import time
 
 table_name = os.environ['DDB_TABLE']
 user_pool_id = os.environ['USER_POOL_ID']
@@ -29,6 +30,7 @@ def get_users():
     return emails
 
 def lambda_handler(event, context):
+    three_days_from_now = int( time.time() ) + 259200
     est_time_delta = datetime.timedelta(hours=5)
     users = get_users()
     for user in users:
@@ -49,7 +51,8 @@ def lambda_handler(event, context):
                 'PK1': {'S': f'TOKEN'},
                 'SK1': {'S': f'TOKEN#{sha256}'},
                 'USER': {'S': f'USER#{user}'},
-                'DATE_STRING': {'S': f'{year}-{month}-{day}'}
+                'DATE_STRING': {'S': f'{year}-{month}-{day}'},
+                'TTL_EXPIRATION': {'N': str(three_days_from_now)}
             }
         )
 

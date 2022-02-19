@@ -174,7 +174,9 @@ class Habit extends Component {
           {this.state.isMounted && (
             <ActivityCalendar
               color={this.props.habit.habitColor}
-              data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
+              // to hide day-of, add -1 argument
+              data={this.state.dataPoints.slice(-numDaysToFetch)}
+              //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
               hideColorLegend={false}
               hideTotalCount={true}
               showWeekdayLabels={true}
