@@ -62,7 +62,15 @@ class CdkHabitTrackerStack(Stack):
                 )
             ),
             account_recovery=cognito.AccountRecovery.EMAIL_ONLY,
-            removal_policy=cdk.RemovalPolicy.DESTROY
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+            password_policy=cognito.PasswordPolicy(
+                min_length=6,
+                require_lowercase=False,
+                require_uppercase=False,
+                require_digits=False,
+                require_symbols=False,
+                temp_password_validity=Duration.days(7)
+            )
         )
 
         auth = apigateway.CognitoUserPoolsAuthorizer(self, "habitsAuthorizer",
