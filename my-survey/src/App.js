@@ -16,7 +16,6 @@ class App extends React.Component {
   getHabitId = (habitName) => habitName.toLowerCase().split(/\s+/).join('-')
 
   getHabits = () => {
-    console.log('Getting Habits')
     const params = new Proxy(new URLSearchParams(window.location.search), {
       get: (searchParams, prop) => searchParams.get(prop),
     })

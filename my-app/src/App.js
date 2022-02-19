@@ -72,7 +72,6 @@ class App extends React.Component {
   handleSubmit = (event) => {
     Auth.currentAuthenticatedUser()
       .then((user) => {
-        console.log('submitting...')
         const token = user.signInUserSession.idToken.jwtToken
         const headers = {
           'Content-Type': 'application/json',
