@@ -1,6 +1,10 @@
-//aws cloudfront create-invalidation --distribution-id E70XD704NPJDM --paths "/*"
-//aws s3 cp --recursive build/ s3://cdkhabits-habitsweakerpotionscombucketdff06391-116yh481gtpp6
-import './App.css';
+/////////////////PROD//////////////////
+// PROD: aws cloudfront create-invalidation --distribution-id E2WZ67Q81CV1B5 --paths "/*"
+// PROD: aws s3 cp --recursive build/ s3://cdkhabits-githabitcombucket6a79c338-hk3nkues0h5f
+/////////////////PROD//////////////////
+// DEV: aws cloudfront create-invalidation --distribution-id E70XD704NPJDM --paths "/*"
+// DEV: aws s3 cp --recursive build/ s3://cdkhabits-habitsweakerpotionscombucketdff06391-116yh481gtpp6
+import './App.css'
 import React from 'react'
 import Habit from './components/Habit/Habit'
 
@@ -53,23 +57,21 @@ class App extends React.Component {
     })
     if (newHabit.length > 2) {
       this.setState({ newHabit: '', habits })
+      this.handleSubmit(habits.length-1)
     }
   }
 
   removeClick(i) {
+    console.log('calling removeClick')
     let values = [...this.state.habits]
     values[i].deletePlanned = true
     // values.splice(i, 1)
     this.setState({ habits: values })
+    this.handleSubmit(i)
   }
 
-  unremoveClick(i) {
-    let values = [...this.state.habits]
-    values[i].deletePlanned = false
-    this.setState({ habits: values })
-  }
-
-  handleSubmit = (event) => {
+  handleSubmit = (i) => {
+    console.log('handling submit')
     Auth.currentAuthenticatedUser()
       .then((user) => {
         const token = user.signInUserSession.idToken.jwtToken
@@ -77,21 +79,19 @@ class App extends React.Component {
           'Content-Type': 'application/json',
           Authorization: token,
         }
-        event.preventDefault()
+        // event.preventDefault()
         const url = process.env.REACT_APP_GET_HABITS_AUTH_URL
-        const data = this.state.habits
+        const data = [this.state.habits[i]]
         fetch(url, {
           method: 'POST',
           headers: headers,
           body: JSON.stringify(data),
         }).then((response) => {
           this.setState({
-            entries: [],
-            exclusiveStartKey: '',
             showEntries: true,
             values: [''],
           })
-          this.getNewEntries()
+          // this.getNewEntries()
         })
       })
       .catch((err) => {
@@ -118,10 +118,10 @@ class App extends React.Component {
                 {el.deletePlanned ? (
                   <div
                     type="button"
-                    className="bullet-button"
-                    onClick={this.unremoveClick.bind(this, i)}
+                    className="to-delete-button"
+                    // onClick={this.unremoveClick.bind(this, i)}
                   >
-                    ➕
+                    💀
                   </div>
                 ) : (
                   <div
@@ -254,12 +254,7 @@ class App extends React.Component {
   }
 
   getEditHabitsUI = () => {
-    return (
-      <form onSubmit={this.handleSubmit}>
-        {this.createUI()}
-        <input type="submit" value="Submit" />
-      </form>
-    )
+    return this.createUI()
   }
 
   componentDidMount() {
@@ -342,4 +337,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default App

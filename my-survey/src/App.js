@@ -1,5 +1,9 @@
-//aws cloudfront create-invalidation --distribution-id E2I2LGCAG9S89X --paths "/*"
-//aws s3 cp --recursive build/ s3://cdkhabits-habitssurveyweakerpotionscombucket15fc8-19lebhcy753i2
+//############## PROD ################
+//PROD: aws cloudfront create-invalidation --distribution-id E8P5WYSXZ0IWD --paths "/*"
+//PROD: aws s3 cp --recursive build/ s3://cdkhabits-surveygithabitcombucket4f6ffd5a-1mwnd3a635op9
+//############## DEV ################
+//DEV: aws cloudfront create-invalidation --distribution-id E2I2LGCAG9S89X --paths "/*"
+//DEV: aws s3 cp --recursive build/ s3://cdkhabits-habitssurveyweakerpotionscombucket15fc8-19lebhcy753i2
 import './App.css'
 import React from 'react'
 import * as Survey from 'survey-react'

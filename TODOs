@@ -1,14 +1,18 @@
-High:
-[ ] Migrate to githabit.com
-
 Medium:
 [ ] Fix header button display to be less ugly
 [ ] add title to page
+[ ] add example user header
 [ ] log and check unsubscriptions
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
 [ ] Add purge user functionality
+[ ] Create a UI for logging habits in the past
+[ ] Make habits draggable in edit mode
+[ ] Configure no-reply@githabit.com email
+[ ] Fix "click here" link in email or make email more explicit
+[ ] Redirect to githabit.com after filling out survey
+[ ]
 
 Low:
 [ ] add tooltip to display count
@@ -53,3 +57,6 @@ Low:
 [x] Add TTL field for tokens
 [x] Format HTML email
 [x] Make password requirements less stringent
+[x] Add favicon
+[x] Migrate to githabit.com
+[x] Improve habit creation UI

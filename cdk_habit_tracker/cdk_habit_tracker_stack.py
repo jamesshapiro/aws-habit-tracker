@@ -33,7 +33,10 @@ class CdkHabitTrackerStack(Stack):
             habits_survey_subdomain_name = [line for line in lines if line.startswith('habits_survey_subdomain_name')][0].split('=')[1]
             hosted_zone_id = [line for line in lines if line.startswith('hosted_zone_id')][0].split('=')[1]
             zone_name = [line for line in lines if line.startswith('zone_name')][0].split('=')[1]
-        
+            githabit_domain=[line for line in lines if line.startswith('githabit_domain')][0].split('=')[1]
+            githabit_survey_domain=[line for line in lines if line.startswith('githabit_survey_domain')][0].split('=')[1]
+            githabit_zone=[line for line in lines if line.startswith('githabit_zone')][0].split('=')[1]
+            githabit_zone_id=[line for line in lines if line.startswith('githabit_zone_id')][0].split('=')[1]
         ddb_table = dynamodb.Table(
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
@@ -345,6 +348,7 @@ class CdkHabitTrackerStack(Stack):
             hosted_zone_id=hosted_zone_id,
             zone_name=zone_name
         )
+
         for subdomain in [habits_subdomain_name, habits_survey_subdomain_name]:
             site_bucket = s3.Bucket(
                 self, f'{subdomain}-bucket',
@@ -371,6 +375,45 @@ class CdkHabitTrackerStack(Stack):
             route53.ARecord(
                 self, f'{subdomain}-alias-record',
                 zone=zone,
+                target=a_record_target,
+                record_name=subdomain
+            )
+            CfnOutput(self, f'{subdomain}-bucket-name', value=site_bucket.bucket_name)
+        #################################################################
+        #githabit_domain
+        #githabit_survey_domain
+        #githabit_zone
+        #githabit_zone_id
+        githabit_zone = route53.HostedZone.from_hosted_zone_attributes(self, "GitHabitHostedZone",
+            hosted_zone_id=githabit_zone_id,
+            zone_name=githabit_zone
+        )
+        for subdomain in [githabit_domain, githabit_survey_domain]:
+            site_bucket = s3.Bucket(
+                self, f'{subdomain}-bucket',
+            )
+            certificate = certificatemanager.DnsValidatedCertificate(
+                self, f'{subdomain}-certificate',
+                domain_name=subdomain,
+                hosted_zone=githabit_zone
+            )
+            distribution = cloudfront.Distribution(
+                self, f'{subdomain}-distribution',
+                default_behavior=cloudfront.BehaviorOptions(
+                    origin=origins.S3Origin(site_bucket),
+                    allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
+                    viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+                ),
+                comment=f'{subdomain} S3 HTTPS',
+                default_root_object='index.html',
+                domain_names=[subdomain],
+                certificate=certificate
+            )
+            CfnOutput(self, f'{subdomain}-cf-distribution', value=distribution.distribution_id)
+            a_record_target = route53.RecordTarget.from_alias(route53_targets.CloudFrontTarget(distribution))
+            route53.ARecord(
+                self, f'{subdomain}-alias-record',
+                zone=githabit_zone,
                 target=a_record_target,
                 record_name=subdomain
             )

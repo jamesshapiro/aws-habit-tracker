@@ -45,7 +45,7 @@ def lambda_handler(event, context):
             }
         )
     response_body = {'shalom': 'haverim!'}
-    response_code = 200
+    response_code = 201
     response = {
         'statusCode': response_code,
         'headers': {
