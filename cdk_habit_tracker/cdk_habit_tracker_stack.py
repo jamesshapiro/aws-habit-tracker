@@ -104,7 +104,8 @@ class CdkHabitTrackerStack(Stack):
             handler='email_habit_survey.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name,
-                'USER_POOL_ID': user_pool.user_pool_id
+                'USER_POOL_ID': user_pool.user_pool_id,
+                'SENDER': f'no-reply@mail.{githabit_domain}'
             },
             timeout=Duration.minutes(15)
         )
@@ -118,7 +119,7 @@ class CdkHabitTrackerStack(Stack):
                 ),
                 iam.PolicyStatement(
                     actions=['ses:SendEmail','ses:SendRawEmail'],
-                    resources=[f'arn:aws:ses:{Aws.REGION}:{Aws.ACCOUNT_ID}:identity/githabitsurvey@gmail.com']
+                    resources=[f'arn:aws:ses:{Aws.REGION}:{Aws.ACCOUNT_ID}:identity/{githabit_domain}']
                 )
             ]
         )

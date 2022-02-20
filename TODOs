@@ -9,16 +9,15 @@ Medium:
 [ ] Add purge user functionality
 [ ] Create a UI for logging habits in the past
 [ ] Make habits draggable in edit mode
-[ ] Configure no-reply@githabit.com email
-[ ] Fix "click here" link in email or make email more explicit
 [ ] Redirect to githabit.com after filling out survey
-[ ]
+[ ] Add proper social card
 
 Low:
 [ ] add tooltip to display count
 [ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
 [ ] add square comments
-[ ] auto-configure Cognito domain from CDK
+[ ] auto-configure the Cognito domain from CDK rather than doing it manually through the console.
+[ ] write a custom resource to handle DKIM rather than doing it manually through the console.
 
 ======================================================
 [x] Implement reminder form w/ token
@@ -60,3 +59,5 @@ Low:
 [x] Add favicon
 [x] Migrate to githabit.com
 [x] Improve habit creation UI
+[x] Configure no-reply@mail.githabit.com email
+[x] Fix "click here" link in email or make email more explicit
