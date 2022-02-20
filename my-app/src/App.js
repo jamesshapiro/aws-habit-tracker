@@ -257,11 +257,21 @@ class App extends React.Component {
       })
   }
 
+  habitsContainGithub = () => {
+    let result = false
+    for (let i = 0; i < this.state.habits.length; i++) {
+      if (this.state.habits[i].habitName.toLowerCase().includes('github')) {
+        return true
+      }
+    }
+    return false
+  }
+
   getHabitGraphs = () => {
     return (
       <div className="habit-graphs">
         {this.state.habits.map((habit, i) => {
-          return <Habit habit={habit} idx={i} />
+          return <Habit habit={habit} idx={i} startIdx={this.habitsContainGithub() ? 1 : 0} />
         })}
       </div>
     )

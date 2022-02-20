@@ -9,7 +9,7 @@ const SCREEN_WIDTH = 850
 const colors = [
   '#b92514', // red
   '#2270A1', // blue
-  '#1e4500', // green
+  '#315514', // green
 ]
 
 class Habit extends Component {
@@ -179,7 +179,7 @@ class Habit extends Component {
         <div className="commit-graph">
           {this.state.isMounted && (
             <ActivityCalendar
-              color={colors[this.props.idx % colors.length]}
+              color={colors[(this.props.idx - this.props.startIdx + colors.length) % colors.length ]}
               // to hide day-of, add -1 argument
               data={this.state.dataPoints.slice(-numDaysToFetch)}
               //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
