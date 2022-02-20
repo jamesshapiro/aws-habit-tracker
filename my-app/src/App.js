@@ -59,15 +59,21 @@ class App extends React.Component {
     })
     if (newHabit.length > 2) {
       this.setState({ newHabit: '', habits })
-      this.handleSubmit(habits.length-1)
+      this.handleSubmit(habits.length - 1)
     }
+  }
+
+  unremoveClick(i) {
+    let values = [...this.state.habits]
+    values[i].deletePlanned = false
+    this.setState({ habits: values })
+    this.handleSubmit(i)
   }
 
   removeClick(i) {
     console.log('calling removeClick')
     let values = [...this.state.habits]
     values[i].deletePlanned = true
-    // values.splice(i, 1)
     this.setState({ habits: values })
     this.handleSubmit(i)
   }
@@ -118,12 +124,17 @@ class App extends React.Component {
               </td>
               <td className="td-button">
                 {el.deletePlanned ? (
-                  <div
-                    type="button"
-                    className="to-delete-button"
-                    // onClick={this.unremoveClick.bind(this, i)}
-                  >
-                    💀
+                  <div>
+                    <span type="button" className="to-delete-button">
+                      💀
+                    </span>
+                    <span
+                      type="button"
+                      className="bullet-button"
+                      onClick={this.unremoveClick.bind(this, i)}
+                    >
+                      ➕
+                    </span>
                   </div>
                 ) : (
                   <div

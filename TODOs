@@ -1,16 +1,19 @@
-Medium:
+High:
 [ ] Fix header button display to be less ugly
 [ ] add title to page
 [ ] add example user header
+[ ] Create a UI for logging habits in the past
+[ ] Make habits draggable in edit mode
+[ ] Redirect to githabit.com after filling out survey
+
+Medium:
 [ ] log and check unsubscriptions
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
 [ ] Add purge user functionality
-[ ] Create a UI for logging habits in the past
-[ ] Make habits draggable in edit mode
-[ ] Redirect to githabit.com after filling out survey
 [ ] Add proper social card
+[ ] Add ability to restore deleted habits
 
 Low:
 [ ] add tooltip to display count
@@ -61,3 +64,4 @@ Low:
 [x] Improve habit creation UI
 [x] Configure no-reply@mail.githabit.com email
 [x] Fix "click here" link in email or make email more explicit
+[x] Add back the "restore habit" option in case the user accidentally deletes
