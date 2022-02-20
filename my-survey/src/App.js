@@ -88,6 +88,9 @@ class App extends React.Component {
       method: 'POST',
       body: JSON.stringify(data),
     })
+    setTimeout(() => {
+      window.location.href = 'https://githabit.com'
+    }, 500)
   }
 
   render() {

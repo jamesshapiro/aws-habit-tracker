@@ -70,7 +70,7 @@ def lambda_handler(event, context):
             },
             Message={
                 'Subject': {
-                    'Data': f'🐇 Habits Survey: {month}-{day}-{year} ✔️'
+                    'Data': f'📆🐇 Habits Survey: {month}-{day}-{year}'
                 },
                 'Body': {
                     'Html': {

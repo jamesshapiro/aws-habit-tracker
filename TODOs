@@ -1,11 +1,11 @@
 High:
 [ ] Create a UI for logging habits in the past
 [ ] Make habits draggable in edit mode
-[ ] Redirect to githabit.com after filling out survey
 [ ] Add an about page
 
 Medium:
 [ ] log and check unsubscriptions
+[ ] vary colors for users
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
@@ -13,7 +13,9 @@ Medium:
 [ ] Add proper social card
 [ ] Add ability to restore deleted habits
 [ ] Add better styling to the email (Helvetica + 512 min width, etc.)
-[ ] Move header buttons to right of screen
+[ ] Support alert confirmation for deleting habit
+[ ] Handle habit submission with ENTER keypress
+[ ] Redirect www.githabit.com to homepage
 
 Low:
 [ ] add tooltip to display count
@@ -68,3 +70,5 @@ Low:
 [x] add example user header
 [x] Fix header button display to be less ugly
 [x] add title to page
+[x] Move header buttons to right of screen
+[x] Redirect to githabit.com after filling out survey
