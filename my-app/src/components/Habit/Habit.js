@@ -169,7 +169,7 @@ class Habit extends Component {
 
     return (
       <div className="habit">
-        <h3 className="habit-title">{this.props.habit.habitDisplayName}</h3>
+        <div className="habit-title">{this.props.habit.habitDisplayName}</div>
         <div className="commit-graph">
           {this.state.isMounted && (
             <ActivityCalendar

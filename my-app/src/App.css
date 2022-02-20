@@ -1,6 +1,88 @@
+.nav-bar-cell {
+  margin-right: 15px;
+}
+
+.nav-bar-table {
+  background-color: lightgrey;
+}
+
+/* h1 values */
+.habit-tracker-header {
+  display: block;
+  font-size: 2em;
+  margin-top: 0em;
+  margin-bottom: 0px;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+.clickable {
+  cursor: pointer;
+  padding: 5px;
+  color: white;
+  background-color: #000;
+  border-radius: 4px;
+  display: block;
+  font-size: 0.83em;
+  margin-top: 0;
+  margin-bottom: 0em;
+  font-weight: bold;
+}
+
+/* h2 values */
+.demo-user {
+  display: block;
+  font-size: 1.5em;
+  margin-top: 30px;
+  margin-bottom: 0em;
+  margin-left: 10px;
+  margin-right: 0;
+  overflow: auto;
+}
+
+@media only screen and (max-width: 850px) {
+  .nav-bar-cell {
+    margin-right: 10px;
+  }
+
+  /* h1 values */
+  .habit-tracker-header {
+    display: block;
+    font-size: 1.4em;
+    margin-left: 10px;
+    font-weight: bold;
+  }
+
+  .clickable {
+    cursor: pointer;
+    padding: 5px;
+    color: white;
+    background-color: #000;
+    border-radius: 4px;
+    display: block;
+    font-size: 0.7em;
+    font-weight: bold;
+  }
+
+  /* h2 values */
+  .demo-user {
+    display: block;
+    font-size: 1.3em;
+    margin-left: 13px;
+    margin-right: 0;
+  }
+}
+
+/* @media only screen and (max-width: 1200px) {
+} */
+
+.habit-ui-table {
+  margin: 10px;
+}
+
 .habit {
   margin: 10px 0 0 0px;
-  width: 95%;
+  width: 100%;
 }
 
 .to-delete {
@@ -23,20 +105,12 @@
   margin-left: 50px;
 }
 
-/* .habit-graphs {
-  margin-bottom: 150px;
-} */
-
-.habit-h1 {
-  margin: 10px 0 0 10px;
-}
-
 .habit-title {
   margin-left: 14px;
-}
-
-@media only screen and (max-width: 850px) {
-}
-
-@media only screen and (max-width: 1200px) {
+  display: block;
+  font-size: 1.17em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-right: 0;
+  font-weight: bold;
 }

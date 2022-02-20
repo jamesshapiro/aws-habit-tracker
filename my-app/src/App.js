@@ -109,7 +109,7 @@ class App extends React.Component {
 
   createUI = () => {
     return (
-      <table>
+      <table className='habit-ui-table'>
         <tbody>
           {this.state.habits.map((el, i) => (
             <tr key={i}>
@@ -298,26 +298,65 @@ class App extends React.Component {
     return (
       <div>
         <div className="App">
-          <div className="habit-h1">
-            {!this.state.isInEditHabitsMode && 'Habit Tracker'}
-            {!this.getIsLoggedIn() && (
-              <button onClick={this.goToLogin}>Login/Signup</button>
-            )}
-            {this.getIsLoggedIn() && (
-              <button onClick={() => signOut()}>Signout</button>
-            )}
-            {this.getIsLoggedIn() && !this.state.isInEditHabitsMode && (
-              <button onClick={() => this.enterEditHabitsMode()}>
-                Edit Habits
-              </button>
-            )}
-            {this.getIsLoggedIn() && this.state.isInEditHabitsMode && (
-              <button onClick={() => this.exitEditHabitsMode()}>
-                Back to Grid!
-              </button>
-            )}
+          <div className="habit-h1" className="nav-bar-table">
+            <table>
+              <tbody>
+                <tr>
+                  <td>
+                    {!this.state.isInEditHabitsMode && (
+                      <span className="nav-bar-cell habit-tracker-header">
+                        Habit Tracker
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    {!this.getIsLoggedIn() ? (
+                      <span
+                        className="nav-bar-cell clickable"
+                        onClick={this.goToLogin}
+                      >
+                        Login/Signup
+                      </span>
+                    ) : (
+                      <span
+                        className="nav-bar-cell clickable"
+                        onClick={() => signOut()}
+                      >
+                        Signout
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    {this.getIsLoggedIn() && !this.state.isInEditHabitsMode && (
+                      <span
+                        className="nav-bar-cell clickable"
+                        onClick={() => this.enterEditHabitsMode()}
+                      >
+                        Edit Habits
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    {this.getIsLoggedIn() && this.state.isInEditHabitsMode && (
+                      <span
+                        className="nav-bar-cell clickable"
+                        onClick={() => this.exitEditHabitsMode()}
+                      >
+                        Back to Grid!
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            {/* {<hr />} */}
           </div>
-          <h1 className="habit-h1">{}</h1>
+          {!this.getIsLoggedIn() && (
+            <>
+              <span className="demo-user">Demo User</span>
+              <hr />
+            </>
+          )}
           {this.state.isMounted &&
             !this.state.isInEditHabitsMode &&
             this.getHabitGraphs()}

@@ -74,7 +74,7 @@ def lambda_handler(event, context):
                 },
                 'Body': {
                     'Html': {
-                        'Data': f"""<html><h3>Today's Habit Survey!</h3><p>Click <a href="{survey_link}">here</a> to fill it out. The link will work for a few days, so make sure to complete the survey before time runs out! You may have to wait up to 24 hours for results to appear."""
+                        'Data': f"""<html><h3>Today's Habit Survey!</h3><p>Click <a href="{survey_link}">here</a> to fill it out. The link will work for a few days, so make sure to complete the survey before time runs out!<br><br>You may need to wait up to 24 hours for results to appear."""
                     }
                 }
             }

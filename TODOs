@@ -1,10 +1,10 @@
 High:
 [ ] Fix header button display to be less ugly
 [ ] add title to page
-[ ] add example user header
 [ ] Create a UI for logging habits in the past
 [ ] Make habits draggable in edit mode
 [ ] Redirect to githabit.com after filling out survey
+[ ] Add an about page
 
 Medium:
 [ ] log and check unsubscriptions
@@ -20,7 +20,7 @@ Low:
 [ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
 [ ] add square comments
 [ ] auto-configure the Cognito domain from CDK rather than doing it manually through the console.
-[ ] write a custom resource to handle DKIM rather than doing it manually through the console.
+[ ] write a custom resource to handle DKIM rather than doing it manually through the console. https://docs.aws.amazon.com/ses/latest/APIReference/API_VerifyDomainIdentity.html
 
 ======================================================
 [x] Implement reminder form w/ token
@@ -65,3 +65,4 @@ Low:
 [x] Configure no-reply@mail.githabit.com email
 [x] Fix "click here" link in email or make email more explicit
 [x] Add back the "restore habit" option in case the user accidentally deletes
+[x] add example user header
