@@ -6,6 +6,12 @@ import sha256 from 'crypto-js/sha256'
 
 const SCREEN_WIDTH = 850
 
+const colors = [
+  '#b92514', // red
+  '#2270A1', // blue
+  '#1e4500', // green
+]
+
 class Habit extends Component {
   constructor(props) {
     super(props)
@@ -173,7 +179,7 @@ class Habit extends Component {
         <div className="commit-graph">
           {this.state.isMounted && (
             <ActivityCalendar
-              color={this.props.habit.habitColor}
+              color={colors[this.props.idx % colors.length]}
               // to hide day-of, add -1 argument
               data={this.state.dataPoints.slice(-numDaysToFetch)}
               //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}

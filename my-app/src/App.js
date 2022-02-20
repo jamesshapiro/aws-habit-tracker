@@ -2,6 +2,7 @@
 // npm run build
 // PROD: aws s3 cp --recursive build/ s3://cdkhabits-githabitcombucket6a79c338-hk3nkues0h5f
 // PROD: aws cloudfront create-invalidation --distribution-id E2WZ67Q81CV1B5 --paths "/*"
+// FFB: npm run build && aws s3 cp --recursive build/ s3://cdkhabits-githabitcombucket6a79c338-hk3nkues0h5f && aws cloudfront create-invalidation --distribution-id E2WZ67Q81CV1B5 --paths "/*"
 /////////////////PROD//////////////////
 // npm run build
 // DEV: aws s3 cp --recursive build/ s3://cdkhabits-habitsweakerpotionscombucketdff06391-116yh481gtpp6
@@ -259,8 +260,8 @@ class App extends React.Component {
   getHabitGraphs = () => {
     return (
       <div className="habit-graphs">
-        {this.state.habits.map((habit) => {
-          return <Habit habit={habit} />
+        {this.state.habits.map((habit, i) => {
+          return <Habit habit={habit} idx={i} />
         })}
       </div>
     )
@@ -347,10 +348,10 @@ class App extends React.Component {
             </span>
           </div>
           <div className="demo-user-div">
-            {!this.getIsLoggedIn() && (
-              <>
-                <span className="demo-user">Roger Habit</span>
-              </>
+            {!this.getIsLoggedIn() ? (
+              <span className="demo-user">Roger Habit</span>
+            ) : (
+              <span className="demo-user">🐇 Keep it up! 🥕</span>
             )}
           </div>
           {this.state.isMounted &&

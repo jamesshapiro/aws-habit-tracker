@@ -124,7 +124,6 @@ class CdkHabitTrackerStack(Stack):
             ]
         )
         email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
-
         lambda_target = targets.LambdaFunction(email_habit_survey_function_cdk)
         
         events.Rule(self, "ScheduleRule",

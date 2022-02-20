@@ -2,20 +2,23 @@ High:
 [ ] Create a UI for logging habits in the past
 [ ] Make habits draggable in edit mode
 [ ] Add an about page
+[ ] Configure a Cognito trigger to send welcome email, register user, and create a few default habits for new users
+[ ] Add some whitespace to the bottom of the habit graph
+[ ] Add padding + rounded corners to create habit UI items
 
 Medium:
+[ ] add "back to grid" button below habit creation UI
 [ ] log and check unsubscriptions
-[ ] vary colors for users
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
 [ ] Add purge user functionality
 [ ] Add proper social card
 [ ] Add ability to restore deleted habits
-[ ] Add better styling to the email (Helvetica + 512 min width, etc.)
 [ ] Support alert confirmation for deleting habit
 [ ] Handle habit submission with ENTER keypress
 [ ] Redirect www.githabit.com to homepage
+[ ] Re-style the survey form
 
 Low:
 [ ] add tooltip to display count
@@ -72,3 +75,5 @@ Low:
 [x] add title to page
 [x] Move header buttons to right of screen
 [x] Redirect to githabit.com after filling out survey
+[x] Add better styling to the email (Helvetica + 512 min width, etc.)
+[x] Vary colors for users by default

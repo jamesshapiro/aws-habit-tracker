@@ -90,7 +90,7 @@ class App extends React.Component {
     })
     setTimeout(() => {
       window.location.href = 'https://githabit.com'
-    }, 500)
+    }, 300)
   }
 
   render() {
