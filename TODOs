@@ -1,6 +1,4 @@
 High:
-[ ] Fix header button display to be less ugly
-[ ] add title to page
 [ ] Create a UI for logging habits in the past
 [ ] Make habits draggable in edit mode
 [ ] Redirect to githabit.com after filling out survey
@@ -14,6 +12,8 @@ Medium:
 [ ] Add purge user functionality
 [ ] Add proper social card
 [ ] Add ability to restore deleted habits
+[ ] Add better styling to the email (Helvetica + 512 min width, etc.)
+[ ] Move header buttons to right of screen
 
 Low:
 [ ] add tooltip to display count
@@ -66,3 +66,5 @@ Low:
 [x] Fix "click here" link in email or make email more explicit
 [x] Add back the "restore habit" option in case the user accidentally deletes
 [x] add example user header
+[x] Fix header button display to be less ugly
+[x] add title to page
