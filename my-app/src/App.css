@@ -105,8 +105,16 @@
   cursor: default;
 }
 
-.td-existing-habit {
+.tr-existing-habit {
+  margin-bottom: 5px;
+}
+
+.div-existing-habit {
   background-color: lightgray;
+  padding: 4px 4px 4px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-bottom: 3px;
 }
 
 .bullet-button {
@@ -125,4 +133,14 @@
   margin-bottom: 1em;
   margin-right: 0;
   font-weight: bold;
+}
+
+.back-to-grid-body {
+  margin-left: 12px;
+  cursor: pointer;
+  padding: 4px 12px 4px 10px;
+  color: white;
+  background-color: #000;
+  border-radius: 8px;
+  font-weight: normal;
 }

@@ -46,6 +46,18 @@ class CdkHabitTrackerStack(Stack):
             removal_policy=cdk.RemovalPolicy.RETAIN
         )
 
+        create_user_function_cdk = lambda_.Function(
+            self, 'HabitsCreateUserCDK',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('functions'),
+            handler='create_user.lambda_handler',
+            environment={
+                'DDB_TABLE': ddb_table.table_name,
+                'SENDER': f'no-reply@mail.{githabit_domain}'
+            },
+            timeout=Duration.seconds(30)
+        )
+
         user_pool = cognito.UserPool(
             self, 'user-pool',
             self_sign_up_enabled=True,
@@ -73,6 +85,9 @@ class CdkHabitTrackerStack(Stack):
                 require_digits=False,
                 require_symbols=False,
                 temp_password_validity=Duration.days(7)
+            ),
+            lambda_triggers=cognito.UserPoolTriggers(
+                post_confirmation=create_user_function_cdk
             )
         )
 
@@ -123,7 +138,7 @@ class CdkHabitTrackerStack(Stack):
                 )
             ]
         )
-        email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
+        #email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
         lambda_target = targets.LambdaFunction(email_habit_survey_function_cdk)
         
         events.Rule(self, "ScheduleRule",
@@ -166,9 +181,15 @@ class CdkHabitTrackerStack(Stack):
             targets=[fetch_github_target]
         )
 
+        email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
+        create_user_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
+
         ddb_table.grant_read_write_data(post_habit_data_function_cdk)
         ddb_table.grant_read_write_data(email_habit_survey_function_cdk)
         ddb_table.grant_write_data(fetch_github_data_function_cdk)
+        ddb_table.grant_write_data(create_user_function_cdk)
+
+        ################# API ##################
 
         api = apigateway.RestApi(
             self,

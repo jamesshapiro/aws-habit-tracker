@@ -11,6 +11,7 @@ table_name = os.environ['DDB_TABLE']
 
 ses_client = boto3.client('ses')
 ddb_client = boto3.client('dynamodb')
+user_pool_id = os.environ['USER_POOL_ID']
 
 months = {
     '01': 'January',
@@ -91,16 +92,6 @@ def lambda_handler(event, context):
                 'TTL_EXPIRATION': {'N': str(three_days_from_now)}
             }
         )
-        ddb_client.put_item(
-            TableName=table_name,
-            Item={
-                'PK1': {'S': f'TOKEN'},
-                'SK1': {'S': f'TOKEN#{sha256}'},
-                'USER': {'S': f'USER#{user}'},
-                'DATE_STRING': {'S': f'{year}-{month}-{day}'},
-                'TTL_EXPIRATION': {'N': str(three_days_from_now)}
-            }
-        )
         email_day = days[day]
         email_month = months[month]
         message = f"""
@@ -140,7 +131,7 @@ def lambda_handler(event, context):
                 <tr>
                   <td style="padding:0 0 36px 0;color:#153643;">
                     <h1 style="font-size:40px;margin:0 0 20px 0;font-family:Arial,sans-serif;">Today's Habit Survey!</h1>
-                    <p style="margin:40px 0 0 0;font-size:36px;line-height:30px;font-family:Arial,sans-serif;">Click <a href="{survey_link}" style="color:#ee4c50;text-decoration:underline;">HERE</a> to fill it out
+                    <p style="margin:40px 0 0 0;font-size:36px;line-height:30px;font-family:Arial,sans-serif;">Click <a href="{survey_link}" style="font-weight:bold;color:#ee4c50;text-decoration:underline;">HERE</a> to fill it out
                   </td>
                 </tr>
                 <tr>

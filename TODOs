@@ -12,6 +12,7 @@ Medium:
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
+
 [ ] Add purge user functionality
 [ ] Add proper social card
 [ ] Add ability to restore deleted habits
@@ -19,6 +20,9 @@ Medium:
 [ ] Handle habit submission with ENTER keypress
 [ ] Redirect www.githabit.com to homepage
 [ ] Re-style the survey form
+[ ] Create a user settings page with subscribe/unsubscribe option
+[ ] Make older days translucent for new users so that the site is less demoralizing
+[ ] Make the header sticky so that it follows you down the page
 
 Low:
 [ ] add tooltip to display count

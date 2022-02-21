@@ -174,45 +174,56 @@ class Habit extends Component {
       : null
 
     return (
-      <div className="habit">
-        <div className="habit-title">{this.props.habit.habitDisplayName}</div>
-        <div className="commit-graph">
-          {this.state.isMounted && (
-            <ActivityCalendar
-              color={colors[(this.props.idx - this.props.startIdx + colors.length) % colors.length ]}
-              // to hide day-of, add -1 argument
-              data={this.state.dataPoints.slice(-numDaysToFetch)}
-              //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
-              hideColorLegend={false}
-              hideTotalCount={true}
-              showWeekdayLabels={true}
-              labels={{
-                legend: {
-                  less: 'Less',
-                  more: 'More',
-                },
-                months: [
-                  'Jan',
-                  'Feb',
-                  'Mar',
-                  'Apr',
-                  'May',
-                  'Jun',
-                  'Jul',
-                  'Aug',
-                  'Sep',
-                  'Oct',
-                  'Nov',
-                  'Dec',
-                ],
-                totalCount: '{{count}} days of 8+ hours sleep in {{year}}',
-                weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-              }}
-              theme={mytheme}
-            ></ActivityCalendar>
-          )}
-        </div>
-      </div>
+      <>
+        {!this.props.habit.deletePlanned &&
+          <div className="habit">
+            <div className="habit-title">
+              {this.props.habit.habitDisplayName}
+            </div>
+            <div className="commit-graph">
+              {this.state.isMounted && (
+                <ActivityCalendar
+                  color={
+                    colors[
+                      (this.props.idx - this.props.startIdx + colors.length) %
+                        colors.length
+                    ]
+                  }
+                  // to hide day-of, add -1 argument
+                  data={this.state.dataPoints.slice(-numDaysToFetch)}
+                  //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
+                  hideColorLegend={false}
+                  hideTotalCount={true}
+                  showWeekdayLabels={true}
+                  labels={{
+                    legend: {
+                      less: 'Less',
+                      more: 'More',
+                    },
+                    months: [
+                      'Jan',
+                      'Feb',
+                      'Mar',
+                      'Apr',
+                      'May',
+                      'Jun',
+                      'Jul',
+                      'Aug',
+                      'Sep',
+                      'Oct',
+                      'Nov',
+                      'Dec',
+                    ],
+                    totalCount: '{{count}} days of 8+ hours sleep in {{year}}',
+                    weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                  }}
+                  theme={mytheme}
+                ></ActivityCalendar>
+              )}
+            </div>
+          </div>
+        }
+      </>
     )
   }
 }

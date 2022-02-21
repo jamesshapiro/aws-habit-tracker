@@ -110,68 +110,76 @@ class App extends React.Component {
 
   createUI = () => {
     return (
-      <table className='habit-ui-table'>
-        <tbody>
-          {this.state.habits.map((el, i) => (
-            <tr key={i}>
-              <td className="td-existing-habit">
-                <div>
+      <>
+        <table className="habit-ui-table">
+          <tbody>
+            {this.state.habits.map((el, i) => (
+              <tr className="tr-existing-habit" key={i}>
+                <td className="td-existing-habit">
+                  <div className="div-existing-habit">
+                    {el.deletePlanned ? (
+                      <span className="to-delete">{el.habitDisplayName}</span>
+                    ) : (
+                      el.habitDisplayName
+                    )}
+                  </div>
+                </td>
+                <td className="td-button">
                   {el.deletePlanned ? (
-                    <span className="to-delete">{el.habitDisplayName}</span>
+                    <div>
+                      <span type="button" className="to-delete-button">
+                        💀
+                      </span>
+                      <span
+                        type="button"
+                        className="bullet-button"
+                        onClick={this.unremoveClick.bind(this, i)}
+                      >
+                        ➕
+                      </span>
+                    </div>
                   ) : (
-                    el.habitDisplayName
-                  )}
-                </div>
-              </td>
-              <td className="td-button">
-                {el.deletePlanned ? (
-                  <div>
-                    <span type="button" className="to-delete-button">
-                      💀
-                    </span>
-                    <span
+                    <div
                       type="button"
                       className="bullet-button"
-                      onClick={this.unremoveClick.bind(this, i)}
+                      onClick={this.removeClick.bind(this, i)}
                     >
-                      ➕
-                    </span>
-                  </div>
-                ) : (
-                  <div
-                    type="button"
-                    className="bullet-button"
-                    onClick={this.removeClick.bind(this, i)}
-                  >
-                    ❌
-                  </div>
-                )}
+                      ❌
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+            <tr key={this.state.habits.length}>
+              <td className="td-textarea">
+                <input
+                  placeholder={'Ex. "Get 8+ hours of sleep"'}
+                  className="bullet-textarea"
+                  onChange={this.handleChange.bind(
+                    this,
+                    this.state.habits.length
+                  )}
+                />
+              </td>
+              <td className="td-button">
+                <div
+                  type="button"
+                  className="bullet-button"
+                  onClick={this.addClick.bind(this)}
+                >
+                  ➕
+                </div>
               </td>
             </tr>
-          ))}
-          <tr key={this.state.habits.length}>
-            <td className="td-textarea">
-              <input
-                placeholder={'Ex. "Get 8+ hours of sleep"'}
-                className="bullet-textarea"
-                onChange={this.handleChange.bind(
-                  this,
-                  this.state.habits.length
-                )}
-              />
-            </td>
-            <td className="td-button">
-              <div
-                type="button"
-                className="bullet-button"
-                onClick={this.addClick.bind(this)}
-              >
-                ➕
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+        <span
+          className="back-to-grid-body"
+          onClick={() => this.exitEditHabitsMode()}
+        >
+          Back to Grid!
+        </span>
+      </>
     )
   }
 
