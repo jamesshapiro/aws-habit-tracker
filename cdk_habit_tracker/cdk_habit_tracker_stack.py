@@ -37,6 +37,7 @@ class CdkHabitTrackerStack(Stack):
             githabit_survey_domain=[line for line in lines if line.startswith('githabit_survey_domain')][0].split('=')[1]
             githabit_zone=[line for line in lines if line.startswith('githabit_zone')][0].split('=')[1]
             githabit_zone_id=[line for line in lines if line.startswith('githabit_zone_id')][0].split('=')[1]
+            api_url=[line for line in lines if line.startswith('api_url')][0].split('=')[1]
         ddb_table = dynamodb.Table(
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
@@ -53,7 +54,9 @@ class CdkHabitTrackerStack(Stack):
             handler='create_user.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name,
-                'SENDER': f'no-reply@mail.{githabit_domain}'
+                'SENDER': f'no-reply@mail.{githabit_domain}',
+                # TODO create this automatically, maybe with custom resources?
+                'UNSUBSCRIBE_URL': f'{api_url}/prod/unsubscribe'
             },
             timeout=Duration.seconds(30)
         )
@@ -119,8 +122,9 @@ class CdkHabitTrackerStack(Stack):
             handler='email_habit_survey.lambda_handler',
             environment={
                 'DDB_TABLE': ddb_table.table_name,
-                'USER_POOL_ID': user_pool.user_pool_id,
-                'SENDER': f'no-reply@mail.{githabit_domain}'
+                'SENDER': f'no-reply@mail.{githabit_domain}',
+                # TODO create this automatically, maybe with custom resources?
+                'UNSUBSCRIBE_URL': f'{api_url}/prod/unsubscribe'
             },
             timeout=Duration.minutes(15)
         )
@@ -129,16 +133,11 @@ class CdkHabitTrackerStack(Stack):
             self, 'cdk-habits-cognito-list-users',
             statements=[
                 iam.PolicyStatement(
-                    actions=['cognito-idp:ListUsers'],
-                    resources=[user_pool.user_pool_arn]
-                ),
-                iam.PolicyStatement(
                     actions=['ses:SendEmail','ses:SendRawEmail'],
                     resources=[f'arn:aws:ses:{Aws.REGION}:{Aws.ACCOUNT_ID}:identity/{githabit_domain}']
                 )
             ]
         )
-        #email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
         lambda_target = targets.LambdaFunction(email_habit_survey_function_cdk)
         
         events.Rule(self, "ScheduleRule",
@@ -229,6 +228,29 @@ class CdkHabitTrackerStack(Stack):
             )
         )
 
+        unsubscribe_function_cdk = lambda_.Function(
+            self, 'UnsubscribeUserCDK',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('functions'),
+            handler='unsubscribe.lambda_handler',
+            environment={
+                'DDB_TABLE': ddb_table.table_name,
+                'SENDER': f'no-reply@mail.{githabit_domain}',
+                'ADMIN_EMAIL': email,
+            },
+            timeout=Duration.seconds(30)
+        )
+        unsubscribe_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
+        ddb_table.grant_read_write_data(unsubscribe_function_cdk)
+
+        unsubscribe_resource = api.root.add_resource(
+            'unsubscribe',
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=["GET", "POST", "DELETE"]
+            )
+        )
+
         get_habit_function_cdk = lambda_.Function(
             self, 'GetHabitAuthCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
@@ -295,6 +317,10 @@ class CdkHabitTrackerStack(Stack):
             get_habit_survey_function_cdk,
             proxy=True
         )
+        unsubscribe_integration = apigateway.LambdaIntegration(
+            unsubscribe_function_cdk,
+            proxy=True
+        )
 
         habit_auth_resource.add_method(
             'GET',
@@ -325,6 +351,17 @@ class CdkHabitTrackerStack(Stack):
         habit_survey_resource.add_method(
             'GET',
             get_habit_survey_integration,
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': True,
+                }
+            }]
+        )
+
+        unsubscribe_resource.add_method(
+            'GET',
+            unsubscribe_integration,
             method_responses=[{
                 'statusCode': '200',
                 'responseParameters': {
@@ -432,10 +469,19 @@ class CdkHabitTrackerStack(Stack):
             )
             CfnOutput(self, f'{subdomain}-cf-distribution', value=distribution.distribution_id)
             a_record_target = route53.RecordTarget.from_alias(route53_targets.CloudFrontTarget(distribution))
-            route53.ARecord(
+            record = route53.ARecord(
                 self, f'{subdomain}-alias-record',
                 zone=githabit_zone,
                 target=a_record_target,
                 record_name=subdomain
             )
             CfnOutput(self, f'{subdomain}-bucket-name', value=site_bucket.bucket_name)
+            if subdomain == githabit_domain:
+                # www.githabit.com -> githabit.com
+                a_record_target = route53.RecordTarget.from_alias(route53_targets.Route53RecordTarget(record))
+                route53.ARecord(
+                    self, f'www-{githabit_domain}-alias-record',
+                    zone=githabit_zone,
+                    target=a_record_target,
+                    record_name=f'www.{subdomain}'
+                )

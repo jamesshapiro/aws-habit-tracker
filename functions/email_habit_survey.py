@@ -11,7 +11,7 @@ table_name = os.environ['DDB_TABLE']
 
 ses_client = boto3.client('ses')
 ddb_client = boto3.client('dynamodb')
-user_pool_id = os.environ['USER_POOL_ID']
+unsubscribe_url = os.environ['UNSUBSCRIBE_URL']
 
 months = {
     '01': 'January',
@@ -47,37 +47,40 @@ days = {
     '31':'31st'
 }
 
-cognito_idp_client = boto3.client('cognito-idp')
-paginator = cognito_idp_client.get_paginator('list_users')
+paginator = ddb_client.get_paginator('query')
 sender = os.environ['SENDER']
 
-def get_users(event):
+def get_subscribers(event):
     if 'user' in event:
         return [event['user']]
     response_iterator = paginator.paginate(
-        UserPoolId=user_pool_id,
-        AttributesToGet=['email']
+        TableName=table_name,
+        KeyConditionExpression='#pk1=:pk1',
+        ExpressionAttributeNames={'#pk1':'PK1'},
+        ExpressionAttributeValues={':pk1':{'S':f'SUBSCRIBED'}}
     )
-    emails = []
-    for users in response_iterator:
-        users_users = users['Users']
-        email_batch = [item['Attributes'][0]['Value'] for item in users_users]
-        emails.extend(email_batch)
-    return emails
+    subscribers = []
+    for items in response_iterator:
+        subscriber_page = [item['SK1']['S'] for item in items['Items']]  
+        subscribers.extend(subscriber_page)
+    return subscribers
+
+def get_token():
+    m = hashlib.sha256()
+    m.update(secrets.token_bytes(4096))
+    return m.hexdigest()
 
 def lambda_handler(event, context):
-    print('{event=}')
     three_days_from_now = int( time.time() ) + 259200
     est_time_delta = datetime.timedelta(hours=5)
-    users = get_users(event)
-    for user in users:
-        print(f'{user=}')
+    subscribers = get_subscribers(event)
+    print(f'{subscribers=}')
+    for subscriber in subscribers:
+        print(f'{subscriber=}')
         print(f'Habit Survey <{sender}>')
         now = datetime.datetime.now()
         now -= est_time_delta
-        m = hashlib.sha256()
-        m.update(secrets.token_bytes(4096))
-        sha256 = m.hexdigest()
+        sha256 = get_token()
         year = str(now.year)
         day = str(now.day).zfill(2)
         month = str(now.month).zfill(2)
@@ -87,11 +90,13 @@ def lambda_handler(event, context):
             Item={
                 'PK1': {'S': f'TOKEN'},
                 'SK1': {'S': f'TOKEN#{sha256}'},
-                'USER': {'S': f'USER#{user}'},
+                'USER': {'S': f'USER#{subscriber}'},
                 'DATE_STRING': {'S': f'{year}-{month}-{day}'},
                 'TTL_EXPIRATION': {'N': str(three_days_from_now)}
             }
         )
+        unsubscribe_token = ddb_client.get_item(TableName=table_name,Key={'PK1': {'S': 'USER#USER'}, 'SK1': {'S': f'USER#{subscriber}'}})['Item']['UNSUBSCRIBE_TOKEN']['S']
+        unsubscribe_link = f'{unsubscribe_url}?token={unsubscribe_token}'
         email_day = days[day]
         email_month = months[month]
         message = f"""
@@ -150,14 +155,14 @@ def lambda_handler(event, context):
                 <tr>
                   <td style="padding:0;width:50%;" align="left">
                     <p style="margin:0;font-size:14px;line-height:16px;font-family:Arial,sans-serif;color:#ffffff;">
-                      GitHabit {year}<br/><a href="http://www.example.com" style="color:#ffffff;text-decoration:underline;">Unsubscribe</a>
+                      GitHabit {year}<br/><a href="{unsubscribe_link}" style="color:#ffffff;text-decoration:underline;">Unsubscribe</a>
                     </p>
                   </td>
                   <td style="padding:0;width:50%;" align="right">
                     <table role="presentation" style="border-collapse:collapse;border:0;border-spacing:0;">
                       <tr>
                         <td style="padding:0 0 0 10px;width:38px;">
-                          <a href="https://githabit.com/" style="color:#ffffff;"><img src="https://cdkhabits-surveygithabitcombucket4f6ffd5a-1mwnd3a635op9.s3.amazonaws.com/rabbit-icon.png" alt="GitHabit" width="38" style="height:auto;display:block;border:0;" /></a>
+                          <a href="https://githabit.com/" style="color:#ffffff;"><img src="https://cdkhabits-surveygithabitcombucket4f6ffd5a-1mwnd3a635op9.s3.amazonaws.com/blue-rabbit.png" alt="GitHabit" width="38" style="height:auto;display:block;border:0;" /></a>
                         </td>
                       </tr>
                     </table>
@@ -178,7 +183,7 @@ def lambda_handler(event, context):
             Source= f'GitHabit.com <{sender}>',
             Destination={
                 'ToAddresses': [
-                    user
+                    subscriber
                 ]
             },
             Message={

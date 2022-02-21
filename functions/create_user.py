@@ -11,11 +11,18 @@ table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 ses_client = boto3.client('ses')
 sender = os.environ['SENDER']
+unsubscribe_url = os.environ['UNSUBSCRIBE_URL']
 
 def get_user(event):
     if 'test_user' in event:
         return event['test_user']
     return event['request']['userAttributes']['email']
+
+def get_token():
+    m = hashlib.sha256()
+    m.update(secrets.token_bytes(4096))
+    return m.hexdigest()
+
 
 def lambda_handler(event, context):
     print(f'{event=}')
@@ -44,6 +51,15 @@ def lambda_handler(event, context):
             'habit_priority': '10'
         },
     ]
+    unsubscribe_token = get_token()
+    ddb_client.put_item(
+        TableName=table_name,
+        Item={
+            'PK1': {'S': 'UNSUBSCRIBE_TOKEN'},
+            'SK1': {'S': f'UNSUBSCRIBE_TOKEN#{unsubscribe_token}'},
+            'USER': {'S': email}
+        }
+    )
     response = ddb_client.put_item(
         TableName=table_name,
         Item={
@@ -51,6 +67,14 @@ def lambda_handler(event, context):
             'SK1':{'S': f'USER#{email}'},
             'UNSUBSCRIBED':{'S': 'FALSE'},
             'TIER':{'S': 'FREE'},
+            'UNSUBSCRIBE_TOKEN': {'S': f'{unsubscribe_token}'}
+        }
+    )
+    response = ddb_client.put_item(
+        TableName=table_name,
+        Item={
+            'PK1':{'S': 'SUBSCRIBED'},
+            'SK1':{'S': email}
         }
     )
     for item in default_habits:
@@ -77,24 +101,24 @@ def lambda_handler(event, context):
         'body': json.dumps(response_body)
     }
     now = datetime.datetime.now()
-    m = hashlib.sha256()
-    m.update(secrets.token_bytes(4096))
-    sha256 = m.hexdigest()
+    first_survey_token = get_token()
     year = str(now.year)
     day = str(now.day).zfill(2)
     month = str(now.month).zfill(2)
-    survey_link = f'https://survey.githabit.com/?token={sha256}&date_string={year}-{month}-{day}'
+    survey_link = f'https://survey.githabit.com/?token={first_survey_token}&date_string={year}-{month}-{day}'
     ddb_client.put_item(
         TableName=table_name,
         Item={
             'PK1': {'S': f'TOKEN'},
-            'SK1': {'S': f'TOKEN#{sha256}'},
+            'SK1': {'S': f'TOKEN#{first_survey_token}'},
             'USER': {'S': f'USER#{email}'},
             'DATE_STRING': {'S': f'{year}-{month}-{day}'},
             'TTL_EXPIRATION': {'N': str(three_days_from_now)}
         }
     )
+
     year = str(now.year)
+    unsubscribe_link = f'{unsubscribe_url}?token={unsubscribe_token}'
     message = f"""
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -152,14 +176,14 @@ def lambda_handler(event, context):
                 <tr>
                   <td style="padding:0;width:50%;" align="left">
                     <p style="margin:0;font-size:14px;line-height:16px;font-family:Arial,sans-serif;color:#ffffff;">
-                      GitHabit {year}<br/><a href="http://www.example.com" style="color:#ffffff;text-decoration:underline;">Unsubscribe</a>
+                      GitHabit {year}<br/><a href="{unsubscribe_link}" style="color:#ffffff;text-decoration:underline;">Unsubscribe</a>
                     </p>
                   </td>
                   <td style="padding:0;width:50%;" align="right">
                     <table role="presentation" style="border-collapse:collapse;border:0;border-spacing:0;">
                       <tr>
                         <td style="padding:0 0 0 10px;width:38px;">
-                          <a href="https://githabit.com/" style="color:#ffffff;"><img src="https://cdkhabits-surveygithabitcombucket4f6ffd5a-1mwnd3a635op9.s3.amazonaws.com/rabbit-icon.png" alt="GitHabit" width="38" style="height:auto;display:block;border:0;" /></a>
+                          <a href="https://githabit.com/" style="color:#ffffff;"><img src="https://cdkhabits-surveygithabitcombucket4f6ffd5a-1mwnd3a635op9.s3.amazonaws.com/blue-rabbit.png" alt="GitHabit" width="38" style="height:auto;display:block;border:0;" /></a>
                         </td>
                       </tr>
                     </table>

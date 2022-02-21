@@ -12,6 +12,9 @@ Medium:
 [ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
+[ ] Add a proper unsubscribe page
+[ ] Send raw emails with List-Unsubscribe header
+[ ] Add double-unsubscribe page
 
 [ ] Add purge user functionality
 [ ] Add proper social card
