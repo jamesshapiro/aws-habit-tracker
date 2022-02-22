@@ -23,8 +23,12 @@ def get_token():
     m.update(secrets.token_bytes(4096))
     return m.hexdigest()
 
-
 def lambda_handler(event, context):
+    now = datetime.datetime.now()
+    year = str(now.year)
+    day = str(now.day).zfill(2)
+    month = str(now.month).zfill(2)
+    date = f'{year}-{month}-{day}'
     print(f'{event=}')
     email = get_user(event)
     if 'test_user' not in event and event['triggerSource'] != 'PostConfirmation_ConfirmSignUp':
@@ -36,19 +40,22 @@ def lambda_handler(event, context):
             'habit_name': 'clean-for-10m',
             'habit_display_name': 'Clean for 10m',
             'habit_color': '#b92514',
-            'habit_priority': '5'
+            'habit_priority': '5',
+            'habit_creation_date': date
         },
         {
             'habit_name': 'get-8h-of-sleep',
             'habit_display_name': 'Get 8h of sleep',
             'habit_color': '#2270A1',
-            'habit_priority': '1'
+            'habit_priority': '1',
+            'habit_creation_date': date
         },
         {
             'habit_name': 'exercise',
             'habit_display_name': 'Exercise',
             'habit_color': '#2270A1',
-            'habit_priority': '10'
+            'habit_priority': '10',
+            'habit_creation_date': date
         },
     ]
     unsubscribe_token = get_token()
@@ -67,7 +74,8 @@ def lambda_handler(event, context):
             'SK1':{'S': f'USER#{email}'},
             'UNSUBSCRIBED':{'S': 'FALSE'},
             'TIER':{'S': 'FREE'},
-            'UNSUBSCRIBE_TOKEN': {'S': f'{unsubscribe_token}'}
+            'UNSUBSCRIBE_TOKEN': {'S': f'{unsubscribe_token}'},
+            'JOIN_DATE': {'S': date}
         }
     )
     response = ddb_client.put_item(
@@ -83,9 +91,10 @@ def lambda_handler(event, context):
             Item={
                 'PK1':{'S': f'USER#{email}#HABIT'},
                 'SK1':{'S': f'HABIT#{item["habit_name"]}'},
-                'COLOR':{'S': item["habit_color"]},
-                'PRIORITY':{'S': str(item["habit_priority"])},
-                'DISPLAY_NAME':{'S': item["habit_display_name"]},
+                'COLOR':{'S': item['habit_color']},
+                'PRIORITY':{'S': str(item['habit_priority'])},
+                'DISPLAY_NAME':{'S': item['habit_display_name']},
+                'CREATION_DATE':{'S': item['habit_creation_date']}
             }
         )
     response_body = {'shalom': 'haverim!'}
@@ -93,31 +102,25 @@ def lambda_handler(event, context):
     response = {
         'statusCode': response_code,
         'headers': {
-            'Access-Control-Allow-Headers': "Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers",
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
-            "X-Requested-With": "*"
+            'Access-Control-Allow-Methods': 'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT',
+            'X-Requested-With': '*'
         },
         'body': json.dumps(response_body)
     }
-    now = datetime.datetime.now()
     first_survey_token = get_token()
-    year = str(now.year)
-    day = str(now.day).zfill(2)
-    month = str(now.month).zfill(2)
-    survey_link = f'https://survey.githabit.com/?token={first_survey_token}&date_string={year}-{month}-{day}'
+    survey_link = f'https://survey.githabit.com/?token={first_survey_token}&date_string={date}'
     ddb_client.put_item(
         TableName=table_name,
         Item={
             'PK1': {'S': f'TOKEN'},
             'SK1': {'S': f'TOKEN#{first_survey_token}'},
             'USER': {'S': f'USER#{email}'},
-            'DATE_STRING': {'S': f'{year}-{month}-{day}'},
+            'DATE_STRING': {'S': date},
             'TTL_EXPIRATION': {'N': str(three_days_from_now)}
         }
     )
-
-    year = str(now.year)
     unsubscribe_link = f'{unsubscribe_url}?token={unsubscribe_token}'
     message = f"""
 <!DOCTYPE html>
@@ -200,21 +203,21 @@ def lambda_handler(event, context):
 </html>
 """
     response = ses_client.send_email(
-            Source= f'GitHabit.com <{sender}>',
-            Destination={
-                'ToAddresses': [
-                    email
-                ]
+        Source= f'GitHabit.com <{sender}>',
+        Destination={
+            'ToAddresses': [
+                email
+            ]
+        },
+        Message={
+            'Subject': {
+                'Data': f'👋🐇 Welcome to GitHabit!'
             },
-            Message={
-                'Subject': {
-                    'Data': f'👋🐇 Welcome to GitHabit!'
-                },
-                'Body': {
-                    'Html': {
-                        'Data': message
-                    }
+            'Body': {
+                'Html': {
+                    'Data': message
                 }
             }
-        )
+        }
+    )
     return event

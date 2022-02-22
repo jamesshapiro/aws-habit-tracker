@@ -7,14 +7,14 @@ High:
 [ ] Add padding + rounded corners to create habit UI items
 
 Medium:
+[ ] log user sign-up date
 [ ] add "back to grid" button below habit creation UI
-[ ] log and check unsubscriptions
-[ ] write an unsubscriber function
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
 [ ] Add a proper unsubscribe page
 [ ] Send raw emails with List-Unsubscribe header
 [ ] Add double-unsubscribe page
+[ ] Write a re-subscribe function
 
 [ ] Add purge user functionality
 [ ] Add proper social card
@@ -84,3 +84,5 @@ Low:
 [x] Redirect to githabit.com after filling out survey
 [x] Add better styling to the email (Helvetica + 512 min width, etc.)
 [x] Vary colors for users by default
+[x] log and check unsubscriptions
+[x] write an unsubscriber function

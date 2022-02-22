@@ -479,9 +479,9 @@ class CdkHabitTrackerStack(Stack):
             if subdomain == githabit_domain:
                 # www.githabit.com -> githabit.com
                 a_record_target = route53.RecordTarget.from_alias(route53_targets.Route53RecordTarget(record))
-                route53.ARecord(
+                route53.CnameRecord(
                     self, f'www-{githabit_domain}-alias-record',
                     zone=githabit_zone,
-                    target=a_record_target,
+                    domain_name=githabit_domain,
                     record_name=f'www.{subdomain}'
                 )
