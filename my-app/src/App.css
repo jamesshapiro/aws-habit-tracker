@@ -15,6 +15,11 @@
   font-weight: bold;
 }
 
+#login-logout-button a {
+  color: white !important;
+  text-decoration: none;
+}
+
 .right-elem {
   float: right;
 }

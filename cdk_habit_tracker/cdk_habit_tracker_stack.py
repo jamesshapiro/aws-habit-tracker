@@ -140,6 +140,8 @@ class CdkHabitTrackerStack(Stack):
         )
         lambda_target = targets.LambdaFunction(email_habit_survey_function_cdk)
         
+        topic = sns.Topic(self, "MAUCount")
+
         events.Rule(self, "ScheduleRule",
             schedule=events.Schedule.cron(minute="0", hour="4"),
             targets=[lambda_target]
@@ -151,7 +153,8 @@ class CdkHabitTrackerStack(Stack):
             code=lambda_.Code.from_asset('functions'),
             handler='habit_data_auth_post.lambda_handler',
             environment={
-                'DDB_TABLE': ddb_table.table_name
+                'DDB_TABLE': ddb_table.table_name,
+                'TOPIC': topic.topic_arn
             },
             timeout=Duration.seconds(30)
         )
@@ -184,6 +187,7 @@ class CdkHabitTrackerStack(Stack):
         create_user_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
 
         ddb_table.grant_read_write_data(post_habit_data_function_cdk)
+        topic.grant_publish(post_habit_data_function_cdk)
         ddb_table.grant_read_write_data(email_habit_survey_function_cdk)
         ddb_table.grant_write_data(fetch_github_data_function_cdk)
         ddb_table.grant_write_data(create_user_function_cdk)
@@ -293,7 +297,7 @@ class CdkHabitTrackerStack(Stack):
             code=lambda_.Code.from_asset('functions'),
             handler='habit_auth_post.lambda_handler',
             environment={
-                'DDB_TABLE': ddb_table.table_name
+                'DDB_TABLE': ddb_table.table_name,
             },
             timeout=Duration.seconds(30),
         )
@@ -423,6 +427,20 @@ class CdkHabitTrackerStack(Stack):
                     allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
                     viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
                 ),
+                error_responses=[
+                    cloudfront.ErrorResponse(
+                        http_status=403,
+                        response_http_status=200,
+                        response_page_path="/index.html",
+                        ttl=cdk.Duration.minutes(30)
+                    ),
+                    cloudfront.ErrorResponse(
+                        http_status=404,
+                        response_http_status=200,
+                        response_page_path="/index.html",
+                        ttl=cdk.Duration.minutes(30)
+                    )
+                ],
                 comment=f'{subdomain} S3 HTTPS',
                 default_root_object='index.html',
                 domain_names=[subdomain],
@@ -462,6 +480,20 @@ class CdkHabitTrackerStack(Stack):
                     allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
                     viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
                 ),
+                error_responses=[
+                    cloudfront.ErrorResponse(
+                        http_status=403,
+                        response_http_status=200,
+                        response_page_path="/index.html",
+                        ttl=cdk.Duration.minutes(30)
+                    ),
+                    cloudfront.ErrorResponse(
+                        http_status=404,
+                        response_http_status=200,
+                        response_page_path="/index.html",
+                        ttl=cdk.Duration.minutes(30)
+                    )
+                ],
                 comment=f'{subdomain} S3 HTTPS',
                 default_root_object='index.html',
                 domain_names=[subdomain],

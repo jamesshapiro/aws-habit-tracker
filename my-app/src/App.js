@@ -10,7 +10,13 @@
 import './App.css'
 import React from 'react'
 import Habit from './components/Habit/Habit'
-// import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useHistory
+} from 'react-router-dom'
 
 import { Amplify, Auth } from 'aws-amplify'
 import { Authenticator } from '@aws-amplify/ui-react'
@@ -34,8 +40,6 @@ class App extends React.Component {
     this.state = {
       habits: [],
       isMounted: false,
-      isLoginPage: false,
-      isInEditHabitsMode: false,
       newHabit: '',
     }
   }
@@ -98,7 +102,6 @@ class App extends React.Component {
           'Content-Type': 'application/json',
           Authorization: token,
         }
-        // event.preventDefault()
         const url = process.env.REACT_APP_GET_HABITS_AUTH_URL
         const data = [this.state.habits[i]]
         fetch(url, {
@@ -110,7 +113,6 @@ class App extends React.Component {
             showEntries: true,
             values: [''],
           })
-          // this.getNewEntries()
         })
       })
       .catch((err) => {
@@ -185,20 +187,11 @@ class App extends React.Component {
         </table>
         {/* <span
           className="back-to-grid-body"
-          onClick={() => this.exitEditHabitsMode()}
         >
           Back to Grid!
         </span> */}
       </>
     )
-  }
-
-  enterEditHabitsMode = () => {
-    this.setState({ isInEditHabitsMode: true })
-  }
-
-  exitEditHabitsMode = () => {
-    this.setState({ isInEditHabitsMode: false })
   }
 
   getNewEntries = () => {
@@ -228,7 +221,6 @@ class App extends React.Component {
             const newState = {
               habits: [...habitItems],
               isMounted: true,
-              isLoginPage: false,
             }
             this.setState(newState)
           })
@@ -274,7 +266,6 @@ class App extends React.Component {
         var newState = {
           habits: habits,
           isMounted: true,
-          isLoginPage: false,
         }
         this.setState(newState)
         return
@@ -309,13 +300,6 @@ class App extends React.Component {
     this.getNewEntries()
   }
 
-  goToLogin = () => {
-    let newState = {
-      isLoginPage: true,
-    }
-    this.setState(newState)
-  }
-
   getIsLoggedIn = () => {
     let userIsLoggedIn = false
     Object.keys(localStorage).map((key) => {
@@ -329,94 +313,137 @@ class App extends React.Component {
     return userIsLoggedIn
   }
 
-  getGraphsForUser = () => {
+  getEditHabitsMode = () => {
     return (
       <div>
         <div className="App">
           <div className="nav-bar-div">
             <span className="left-elem">
-              {!this.state.isInEditHabitsMode ? (
-                <span className="nav-bar-cell habit-tracker-header">
-                  Habit Tracker
-                </span>
-              ) : (
-                <span className="nav-bar-cell habit-tracker-header">
-                  Edit Habits
-                </span>
-              )}
+              <span className="nav-bar-cell habit-tracker-header">
+                Edit Habits
+              </span>
             </span>
             <span className="right-elem">
-              {!this.getIsLoggedIn() ? (
-                <span
-                  className="nav-bar-cell clickable"
-                  onClick={this.goToLogin}
-                >
-                  Login/Signup
-                </span>
-              ) : (
-                <span
-                  className="nav-bar-cell clickable"
-                  onClick={() => signOut()}
-                >
-                  Signout
-                </span>
-              )}
+              <span
+                className="nav-bar-cell clickable"
+                id="login-logout-button"
+                onClick={() => signOut()}
+              >
+                <Link to="/">Signout</Link>
+              </span>
             </span>
             <span className="right-elem">
-              {this.getIsLoggedIn() &&
-                (!this.state.isInEditHabitsMode ? (
-                  <span
-                    className="nav-bar-cell clickable"
-                    onClick={() => this.enterEditHabitsMode()}
-                  >
-                    Edit Habits
-                  </span>
-                ) : (
-                  <span
-                    className="nav-bar-cell clickable"
-                    onClick={() => this.exitEditHabitsMode()}
-                  >
-                    Back to Grid!
-                  </span>
-                ))}
+              <span
+                className="nav-bar-cell clickable"
+                id="login-logout-button"
+              >
+                <Link to="/">Back to Grid!</Link>
+              </span>
+            </span>
+          </div>
+          <span className="demo-user">🐇 Keep it up! 🥕</span>
+          {this.state.isMounted && this.getEditHabitsUI()}
+        </div>
+      </div>
+    ) 
+  }
+
+  getMainEditHabitsView = () => {
+    return !this.getIsLoggedIn()
+      ? this.getLoggedOutMode()
+      : this.getEditHabitsMode()
+  }
+
+  getLoggedOutMode = () => {
+    return (
+      <div>
+        <div className="App">
+          <div className="nav-bar-div">
+            <span className="left-elem">
+              <span className="nav-bar-cell habit-tracker-header">
+                Habit Tracker
+              </span>
+            </span>
+            <span className="right-elem">
+              <span
+                className="nav-bar-cell clickable"
+                id="login-logout-button"
+              >
+                <Link to="/login">Login/Signup</Link>
+              </span>
             </span>
           </div>
           <div className="demo-user-div">
-            {!this.getIsLoggedIn() ? (
-              <span className="demo-user">Roger Habit</span>
-            ) : (
-              <span className="demo-user">🐇 Keep it up! 🥕</span>
-            )}
+            <span className="demo-user">Roger Habit</span>
           </div>
-          {this.state.isMounted &&
-            !this.state.isInEditHabitsMode &&
-            this.getHabitGraphs()}
-          {this.state.isMounted &&
-            this.state.isInEditHabitsMode &&
-            this.getEditHabitsUI()}
+          {this.state.isMounted && this.getHabitGraphs()}
         </div>
       </div>
     )
   }
 
-  getFrontPage = () => {
-    if (this.state.isLoginPage) {
-      return (
-        <Authenticator>
-          {() => {
-            this.setState({ isLoginPage: false })
-            window.location.reload(false)
-            return this.getGraphsForUser()
-          }}
-        </Authenticator>
-      )
-    } else {
-      return this.getGraphsForUser()
-    }
+  getLoggedInMode = () => {
+    return (
+      <div>
+        <div className="App">
+          <div className="nav-bar-div">
+            <span className="left-elem">
+              <span className="nav-bar-cell habit-tracker-header">
+                Habit Tracker
+              </span>
+            </span>
+            <span className="right-elem">
+              <span
+                className="nav-bar-cell clickable"
+                id="login-logout-button"
+                onClick={() => signOut()}
+              >
+                <Link to="/">Signout</Link>
+              </span>
+            </span>
+            <span className="right-elem">
+              <span
+                className="nav-bar-cell clickable"
+                id="login-logout-button"
+              >
+                <Link to="/edit-habits">Edit Habits</Link>
+              </span>
+            </span>
+          </div>
+          <div className="demo-user-div">
+            <span className="demo-user">🐇 Keep it up! 🥕</span>
+          </div>
+          {this.state.isMounted && this.getHabitGraphs()}
+        </div>
+      </div>
+    )
+  }
+
+  getMainView = () => {
+    return !this.getIsLoggedIn()
+      ? this.getLoggedOutMode()
+      : this.getLoggedInMode()
   }
 
   render() {
-    return this.getFrontPage()
+    return (
+      <Router>
+        <Switch>
+          <Route path="/login">
+            <Authenticator>
+              {() => {
+                const history = useHistory()
+                history.push('/')
+                window.location.reload(false)
+                return this.getMainView()
+              }}
+            </Authenticator>
+          </Route>
+          <Route path="/edit-habits">{this.getMainEditHabitsView()}</Route>
+          <Route path="/">{this.getMainView()}</Route>
+        </Switch>
+      </Router>
+    )
   }
 }
 

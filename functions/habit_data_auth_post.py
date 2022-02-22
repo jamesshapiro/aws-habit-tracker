@@ -5,6 +5,8 @@ import sys
 
 table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
+sns_client = boto3.client('sns')
+topic = os.environ['TOPIC']
 
 def lambda_handler(event, context):
     body = json.loads(event['body'])
@@ -32,6 +34,7 @@ def lambda_handler(event, context):
     item = response['Item']
     date = item['DATE_STRING']['S']
     user = item['USER']['S'][len('USER#'):]
+    sns = f'{user}-survey'
     for habit_name in body['data_points']:
         level = body['data_points'][habit_name] - 1
         count = body['data_points'][habit_name] - 1
@@ -44,6 +47,11 @@ def lambda_handler(event, context):
                 'DATE_LEVEL': {'S': str(level)}
             }
         )
+    sns_client.publish(
+        TopicArn=topic,
+        Message=sns,
+        Subject=sns
+    )
     response_body = {'shalom': 'haverim!'}
     response_code = 201
     response = {
