@@ -56,8 +56,8 @@ def lambda_handler(event, context):
         response = ddb_client.update_item(
             TableName=table_name,
             Key={
-                'PK1': 'USER#USER',
-                'SK1': f'USER#{user}'
+                'PK1': {'S': 'USER#USER'},
+                'SK1': {'S': f'USER#{user}'}
             },
             UpdateExpression='SET #unsubscribed = :unsubscribed',
             ExpressionAttributeNames={'#unsubscribed': 'UNSUBSCRIBED'},
