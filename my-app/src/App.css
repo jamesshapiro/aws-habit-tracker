@@ -144,3 +144,7 @@
   border-radius: 8px;
   font-weight: normal;
 }
+
+#habit-start-date {
+  fill: rgb(212, 175, 55);
+}

@@ -297,7 +297,7 @@ class CdkHabitTrackerStack(Stack):
             },
             timeout=Duration.seconds(30),
         )
-        ddb_table.grant_write_data(post_habit_auth_function_cdk)
+        ddb_table.grant_read_write_data(post_habit_auth_function_cdk)
 
         # GET HABIT AUTH FUNCTIONS
         get_habit_auth_integration = apigateway.LambdaIntegration(

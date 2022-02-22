@@ -45,7 +45,7 @@ class Habit extends Component {
         secondToLastDigit = otherDigit
       }
     }
-    
+
     const result = Math.min(lastDigit + secondToLastDigit, 4)
     return result
   }
@@ -113,10 +113,10 @@ class Habit extends Component {
       var url =
         process.env.REACT_APP_GET_HABIT_DATA_AUTH_URL +
         `?user=${username}&PK1=${this.props.habit.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
-      
+
       fetch(url, {
         method: 'GET',
-        headers: headers
+        headers: headers,
       })
         .then((response) => response.json())
         .then((data) => {
@@ -161,6 +161,34 @@ class Habit extends Component {
     this.getNewEntries()
   }
 
+  getDayBefore(dateString) {
+    console.log(dateString)
+    const year = parseInt(dateString.slice(0,4))
+    const month = parseInt(dateString.slice(5,7)) - 1
+    const day = parseInt(dateString.slice(8))
+    const eveOfStartDate = new Date(year, month, day)
+    eveOfStartDate.setDate(eveOfStartDate.getDate() - 1)
+    const dd = String(eveOfStartDate.getDate()).padStart(2, '0')
+    const mm = String(eveOfStartDate.getMonth() + 1).padStart(2, '0')
+    const yyyy = eveOfStartDate.getFullYear()
+    return `${yyyy}-${mm}-${dd}`
+  }
+
+  componentDidUpdate(prevProps) {
+    const dayBefore = this.getDayBefore(this.props.habit.habitCreationDate)
+    console.log(dayBefore)
+    if (prevProps) {
+      const commitGraphId = document.getElementById(`habit-${this.props.idx}`)
+      const rects = Array.from(commitGraphId.getElementsByTagName('rect'))
+      rects.forEach((item) => {
+        if (item.getAttribute('data-date') === dayBefore) {
+          // console.log('match!')
+          item.id = 'habit-start-date'
+        }
+      })
+    }
+  }
+
   render() {
     const numDaysToFetch = this.getNumDaysToFetch()
     const mytheme = this.props.habit.habitName.toLowerCase().includes('github')
@@ -175,12 +203,12 @@ class Habit extends Component {
 
     return (
       <>
-        {!this.props.habit.deletePlanned &&
+        {!this.props.habit.deletePlanned && (
           <div className="habit">
             <div className="habit-title">
               {this.props.habit.habitDisplayName}
             </div>
-            <div className="commit-graph">
+            <div className="commit-graph" id={`habit-${this.props.idx}`}>
               {this.state.isMounted && (
                 <ActivityCalendar
                   color={
@@ -222,7 +250,7 @@ class Habit extends Component {
               )}
             </div>
           </div>
-        }
+        )}
       </>
     )
   }

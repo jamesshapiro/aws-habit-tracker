@@ -2,11 +2,19 @@ import os
 import json
 import boto3
 import sys
+import datetime
 
 table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
+    now = datetime.datetime.now()
+    est_time_delta = datetime.timedelta(hours=5)
+    now -= est_time_delta
+    year = str(now.year)
+    day = str(now.day).zfill(2)
+    month = str(now.month).zfill(2)
+    date = f'{year}-{month}-{day}'
     email = event['requestContext']['authorizer']['claims']['email']
     print(f'{event=}')
     body = json.loads(event['body'])
@@ -31,17 +39,26 @@ def lambda_handler(event, context):
         print(f'{response=}')
     for item in to_put:
         print(f'putting {item=}')
-        response = ddb_client.put_item(
+        response = ddb_client.get_item(
             TableName=table_name,
-            Item={
+            Key={
                 'PK1':{'S': f'USER#{email}#HABIT'},
-                'SK1':{'S': f'HABIT#{item["habitName"]}'},
-                'COLOR':{'S': item["habitColor"]},
-                'PRIORITY':{'S': str(item["habitPriority"])},
-                'DISPLAY_NAME':{'S': item["habitDisplayName"]},
+                'SK1':{'S': f'HABIT#{item["habitName"]}'}
             }
         )
-        print(f'{response=}')
+        if 'Item' not in response:
+            response = ddb_client.put_item(
+                TableName=table_name,
+                Item={
+                    'PK1':{'S': f'USER#{email}#HABIT'},
+                    'SK1':{'S': f'HABIT#{item["habitName"]}'},
+                    'COLOR':{'S': item["habitColor"]},
+                    'PRIORITY':{'S': str(item["habitPriority"])},
+                    'DISPLAY_NAME':{'S': item["habitDisplayName"]},
+                    'CREATION_DATE': {'S': date}
+                }
+            )
+            print(f'{response=}')
     response_body = {'shalom': 'haverim!'}
     response_code = 200
     response = {

@@ -49,6 +49,14 @@ class App extends React.Component {
     return habitName.toLowerCase().split(/\s+/).join('-')
   }
 
+  getTodayDateString() {
+    const today = new Date()
+    const dd = String(today.getDate()).padStart(2, '0')
+    const mm = String(today.getMonth() + 1).padStart(2, '0')
+    const yyyy = today.getFullYear()
+    return `${yyyy}-${mm}-${dd}`
+  }
+
   addClick = () => {
     let habits = [...this.state.habits]
     let newHabit = this.state.newHabit
@@ -57,6 +65,7 @@ class App extends React.Component {
       habitDisplayName: newHabit,
       habitColor: '#b92514',
       habitPriority: 0,
+      habitCreationDate: this.getTodayDateString()
     })
     if (newHabit.length > 2) {
       this.setState({ newHabit: '', habits })
@@ -212,6 +221,7 @@ class App extends React.Component {
                 habitName: item.SK1.S.slice(6),
                 habitColor: item.COLOR.S,
                 habitPriority: parseInt(item.PRIORITY.S),
+                habitCreationDate: item.CREATION_DATE.S
               }
             })
             const newState = {
@@ -229,30 +239,35 @@ class App extends React.Component {
             habitDisplayName: 'Clean for 10m',
             habitColor: '#b92514',
             habitPriority: 100,
+            habitCreationDate: '2000-01-01'
           },
           {
             habitName: 'get-8h-of-sleep',
             habitDisplayName: 'Get 8h of sleep',
             habitColor: '#2270A1',
             habitPriority: 99,
+            habitCreationDate: '2000-01-01'
           },
           {
             habitName: 'stay-hydrated',
             habitDisplayName: 'Stay Hydrated',
             habitColor: '#1e4500',
             habitPriority: 98,
+            habitCreationDate: '2000-01-01'
           },
           {
             habitName: 'read-for-30m',
             habitDisplayName: 'Read for 30m',
             habitColor: '#b92514',
             habitPriority: 97,
+            habitCreationDate: '2000-01-01'
           },
           {
             habitName: 'exercise',
             habitDisplayName: 'Exercise',
             habitColor: '#2270A1',
             habitPriority: 96,
+            habitCreationDate: '2000-01-01'
           },
         ]
         var newState = {

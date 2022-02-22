@@ -15,6 +15,7 @@ Medium:
 [ ] Send raw emails with List-Unsubscribe header
 [ ] Add double-unsubscribe page
 [ ] Write a re-subscribe function
+[ ] Fix habit POST method to support updating fields like priority/color/etc. instead of just ignoring them (while respecting original date add)
 
 [ ] Add purge user functionality
 [ ] Add proper social card
