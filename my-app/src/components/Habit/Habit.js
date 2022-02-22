@@ -18,6 +18,7 @@ class Habit extends Component {
     this.state = {
       dataPoints: [],
       isMounted: false,
+      abridgeLast: true,
     }
   }
 
@@ -48,6 +49,14 @@ class Habit extends Component {
 
     const result = Math.min(lastDigit + secondToLastDigit, 4)
     return result
+  }
+
+  getTodayDateString() {
+    const today = new Date()
+    const dd = String(today.getDate()).padStart(2, '0')
+    const mm = String(today.getMonth() + 1).padStart(2, '0')
+    const yyyy = today.getFullYear()
+    return `${yyyy}-${mm}-${dd}`
   }
 
   getDaysOfYear = (user, habitName) => {
@@ -127,6 +136,8 @@ class Habit extends Component {
               level: Math.min(parseInt(item.DATE_LEVEL.S), 4),
             }
           })
+          let abridgeLast = true
+          const todayDateString = this.getTodayDateString()
           dataItems.map((item) => {
             daysOfYear.forEach((dayOfYear) => {
               if (item.date === dayOfYear.date) {
@@ -135,7 +146,21 @@ class Habit extends Component {
               }
             })
           })
-          const newState = { dataPoints: [...daysOfYear], isMounted: true }
+          dataItems.forEach((item) => {
+            if (todayDateString === item.date) {
+              if (item.level > 0) {
+                console.log(item.level)
+                abridgeLast = false
+                console.log('decision')
+              }
+            }
+          })
+          const newState = {
+            dataPoints: [...daysOfYear],
+            isMounted: true,
+            abridgeLast
+          }
+          // const newState = { dataPoints: [...daysOfYear], isMounted: true, abridgeLast }
           this.setState(newState)
         })
     } else {
@@ -162,9 +187,8 @@ class Habit extends Component {
   }
 
   getDayBefore(dateString) {
-    console.log(dateString)
-    const year = parseInt(dateString.slice(0,4))
-    const month = parseInt(dateString.slice(5,7)) - 1
+    const year = parseInt(dateString.slice(0, 4))
+    const month = parseInt(dateString.slice(5, 7)) - 1
     const day = parseInt(dateString.slice(8))
     const eveOfStartDate = new Date(year, month, day)
     eveOfStartDate.setDate(eveOfStartDate.getDate() - 1)
@@ -176,13 +200,11 @@ class Habit extends Component {
 
   componentDidUpdate(prevProps) {
     const dayBefore = this.getDayBefore(this.props.habit.habitCreationDate)
-    console.log(dayBefore)
     if (prevProps) {
       const commitGraphId = document.getElementById(`habit-${this.props.idx}`)
       const rects = Array.from(commitGraphId.getElementsByTagName('rect'))
       rects.forEach((item) => {
         if (item.getAttribute('data-date') === dayBefore) {
-          // console.log('match!')
           item.id = 'habit-start-date'
         }
       })
@@ -200,7 +222,8 @@ class Habit extends Component {
           level4: '#216E39',
         }
       : null
-
+    // TODO add timezone logic
+    let daysToAbridge = this.state.abridgeLast ? 1 : 0
     return (
       <>
         {!this.props.habit.deletePlanned && (
@@ -218,7 +241,12 @@ class Habit extends Component {
                     ]
                   }
                   // to hide day-of, add -1 argument
-                  data={this.state.dataPoints.slice(-numDaysToFetch)}
+
+                  data={
+                    this.state.abridgeLast
+                      ? this.state.dataPoints.slice(-numDaysToFetch, -1)
+                      : this.state.dataPoints.slice(-numDaysToFetch,)
+                  }
                   //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
                   hideColorLegend={false}
                   hideTotalCount={true}
