@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import ActivityCalendar from 'react-activity-calendar'
-import { Amplify, Auth } from 'aws-amplify'
+import { Auth } from 'aws-amplify'
 
 import sha256 from 'crypto-js/sha256'
 
@@ -18,7 +18,7 @@ class Habit extends Component {
     this.state = {
       dataPoints: [],
       isMounted: false,
-      abridgeLast: true,
+      abridgeLast: false,
     }
   }
 
@@ -92,16 +92,6 @@ class Habit extends Component {
     }
     return daysOfYear
   }
-
-  // TODO: try this again with functional components
-  // getCurrentUser = async () => {
-  //   try {
-  //     const user = await Auth.currentAuthenticatedUser()
-  //     return user.attributes.email
-  //   } catch (error) {
-  //     return 'display'
-  //   }
-  // }
 
   getSquaresForUser = (user) => {
     const tomorrow = new Date()

@@ -10,6 +10,7 @@
 import './App.css'
 import React from 'react'
 import Habit from './components/Habit/Habit'
+// import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 
 import { Amplify, Auth } from 'aws-amplify'
 import { Authenticator } from '@aws-amplify/ui-react'
@@ -182,12 +183,12 @@ class App extends React.Component {
             </tr>
           </tbody>
         </table>
-        <span
+        {/* <span
           className="back-to-grid-body"
           onClick={() => this.exitEditHabitsMode()}
         >
           Back to Grid!
-        </span>
+        </span> */}
       </>
     )
   }
