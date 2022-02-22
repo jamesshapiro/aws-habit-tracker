@@ -148,11 +148,7 @@ class Habit extends Component {
           })
           dataItems.forEach((item) => {
             if (todayDateString === item.date) {
-              if (item.level > 0) {
-                console.log(item.level)
-                abridgeLast = false
-                console.log('decision')
-              }
+              abridgeLast = false
             }
           })
           const newState = {
