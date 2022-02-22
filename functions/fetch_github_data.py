@@ -27,7 +27,8 @@ def lambda_handler(event, context):
                 'SK1': {'S': f'HABIT#commit-to-github'},
                 'PRIORITY': {'S': '90'},
                 'COLOR': {'S': '#216e39'},
-                'DISPLAY_NAME': {'S': 'Commit to GitHub'}
+                'DISPLAY_NAME': {'S': 'Commit to GitHub'},
+                'CREATION_DATE': {'S': '2021-12-11'}
             }
         )
         for date, count in grab_data(url):

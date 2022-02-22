@@ -424,8 +424,24 @@ class App extends React.Component {
       ? this.getLoggedOutMode()
       : this.getLoggedInMode()
   }
-
   render() {
+    const validPaths = ['', '/login', '/edit-habits']
+    validPaths.forEach((item) =>
+      validPaths.push(item + '/')
+    )
+    if (
+      window.location.pathname &&
+      !validPaths.includes(window.location.pathname)
+    ) {
+      // console.log(`window.location.path == ${window.location.pathname}`)
+      window.location = 'https://githabit.com'
+    }
+    if (
+      window.location.pathname && !this.getIsLoggedIn() && !['', '/', '/login', '/login/'].includes(window.location.pathname)
+    ) {
+      // console.log(`window.location.path == ${window.location.pathname}`)
+      window.location = 'https://githabit.com'
+    }
     return (
       <Router>
         <Switch>
