@@ -24,7 +24,9 @@ def get_token():
     return m.hexdigest()
 
 def lambda_handler(event, context):
+    est_time_delta = datetime.timedelta(hours=5)
     now = datetime.datetime.now()
+    now -= est_time_delta
     year = str(now.year)
     day = str(now.day).zfill(2)
     month = str(now.month).zfill(2)
@@ -34,7 +36,7 @@ def lambda_handler(event, context):
     if 'test_user' not in event and event['triggerSource'] != 'PostConfirmation_ConfirmSignUp':
         return event
     three_days_from_now = int( time.time() ) + 259200
-    est_time_delta = datetime.timedelta(hours=5)
+    
     default_habits = [
         {
             'habit_name': 'clean-for-10m',

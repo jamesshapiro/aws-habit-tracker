@@ -2,12 +2,10 @@ High:
 [ ] Create a UI for logging habits in the past
 [ ] Make habits draggable in edit mode
 [ ] Add an about page
-[ ] Configure a Cognito trigger to send welcome email, register user, and create a few default habits for new users
 [ ] Add some whitespace to the bottom of the habit graph
-[ ] Add padding + rounded corners to create habit UI items
 
 Medium:
-[ ] log user sign-up date
+[ ] add a 404 page
 [ ] add "back to grid" button below habit creation UI
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
@@ -16,6 +14,8 @@ Medium:
 [ ] Add double-unsubscribe page
 [ ] Write a re-subscribe function
 [ ] Fix habit POST method to support updating fields like priority/color/etc. instead of just ignoring them (while respecting original date add)
+[ ] Center text over habits
+[ ] Enable caching of common, valid requests. Use Lambda@Edge for bad requests
 
 [ ] Add purge user functionality
 [ ] Add proper social card
@@ -87,3 +87,7 @@ Low:
 [x] Vary colors for users by default
 [x] log and check unsubscriptions
 [x] write an unsubscriber function
+[x] Configure a Cognito trigger to send welcome email, register user, and create a few default habits for new users
+[x] Add padding + rounded corners to create habit UI items
+[x] log user sign-up date
+[x] Fix 404 issue by using Lambda@Edge with CF

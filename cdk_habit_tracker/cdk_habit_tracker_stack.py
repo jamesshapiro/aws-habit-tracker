@@ -38,6 +38,8 @@ class CdkHabitTrackerStack(Stack):
             githabit_zone=[line for line in lines if line.startswith('githabit_zone')][0].split('=')[1]
             githabit_zone_id=[line for line in lines if line.startswith('githabit_zone_id')][0].split('=')[1]
             api_url=[line for line in lines if line.startswith('api_url')][0].split('=')[1]
+            test_username=[line for line in lines if line.startswith('test_username')][0].split('=')[1]
+            test_password=[line for line in lines if line.startswith('test_password')][0].split('=')[1]
         ddb_table = dynamodb.Table(
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
@@ -179,7 +181,7 @@ class CdkHabitTrackerStack(Stack):
             })
         )
         events.Rule(self, "GitHubFetchScheduleRule",
-            schedule=events.Schedule.cron(minute="0", hour="4"),
+            schedule=events.Schedule.cron(minute="*/5", hour="4,5,6,7"),
             targets=[fetch_github_target]
         )
 
@@ -473,12 +475,28 @@ class CdkHabitTrackerStack(Stack):
                 domain_name=subdomain,
                 hosted_zone=githabit_zone
             )
+            
+            kwargs = {}
+            if subdomain == githabit_domain:
+                server_router_function = cloudfront.experimental.EdgeFunction(self, "HabitsServerRouter",
+                    runtime=lambda_.Runtime.PYTHON_3_9,
+                    code=lambda_.Code.from_asset('lambda_edge'),
+                    handler='server_router.lambda_handler',
+                )            
+                kwargs = {
+                    "edge_lambdas": [cloudfront.EdgeLambda(
+                        function_version=server_router_function.current_version,
+                        event_type=cloudfront.LambdaEdgeEventType.VIEWER_REQUEST)
+                    ],
+                }
+            
             distribution = cloudfront.Distribution(
                 self, f'{subdomain}-distribution',
                 default_behavior=cloudfront.BehaviorOptions(
                     origin=origins.S3Origin(site_bucket),
                     allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
-                    viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+                    viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    **kwargs
                 ),
                 error_responses=[
                     cloudfront.ErrorResponse(
@@ -486,14 +504,15 @@ class CdkHabitTrackerStack(Stack):
                         response_http_status=200,
                         response_page_path="/index.html",
                         ttl=cdk.Duration.minutes(30)
-                    ),
-                    cloudfront.ErrorResponse(
-                        http_status=404,
-                        response_http_status=200,
-                        response_page_path="/index.html",
-                        ttl=cdk.Duration.minutes(30)
                     )
                 ],
+                #     cloudfront.ErrorResponse(
+                #         http_status=404,
+                #         response_http_status=200,
+                #         response_page_path="/index.html",
+                #         ttl=cdk.Duration.minutes(30)
+                #     )
+                # ],
                 comment=f'{subdomain} S3 HTTPS',
                 default_root_object='index.html',
                 domain_names=[subdomain],
@@ -517,3 +536,38 @@ class CdkHabitTrackerStack(Stack):
                     domain_name=githabit_domain,
                     record_name=f'www.{subdomain}'
                 )
+            
+        requests_layer = lambda_.LayerVersion(self,'Requests39Layer',
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+            code=lambda_.Code.from_asset('layers/requestspython39.zip'),
+            compatible_architectures=[lambda_.Architecture.X86_64]
+        )
+
+        lambda_edge_warmer_cdk = lambda_.Function(
+            self, 'LambdaEdgeWarmer',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('lambda_edge'),
+            handler='lambda_edge_warmer.lambda_handler',
+            environment={
+                'URL': githabit_domain,
+                'TEST_USERNAME': test_username,
+                'TEST_PASSWORD': test_password
+            },
+            timeout=Duration.seconds(30),
+            layers=[requests_layer]
+        )
+        lambda_target = targets.LambdaFunction(lambda_edge_warmer_cdk)
+        events.Rule(self, "WarmLambdaEdgeCronRule",
+            schedule=events.Schedule.cron(minute='*', hour='*'),
+            targets=[lambda_target]
+        )
+        lambda_target = targets.LambdaFunction(get_habit_function_cdk)
+        events.Rule(self, "WarmGetHabitsCronRule",
+            schedule=events.Schedule.cron(minute='*/2', hour='*'),
+            targets=[lambda_target]
+        )
+        lambda_target = targets.LambdaFunction(get_habit_data_auth_function_cdk)
+        events.Rule(self, "WarmGetHabitDataCronRule",
+            schedule=events.Schedule.cron(minute='*/2', hour='*'),
+            targets=[lambda_target]
+        )

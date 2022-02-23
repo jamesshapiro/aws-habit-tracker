@@ -19,7 +19,9 @@ from cdk_habit_tracker.cdk_habit_tracker_stack import CdkHabitTrackerStack
 
 
 app = cdk.App()
-my_stack = CdkHabitTrackerStack(app, "CdkHabits")
+my_stack = CdkHabitTrackerStack(app, "CdkHabits",
+    env={'region': 'us-east-1'}
+)
 # Aspects.of(my_stack).add(ForceDeletion())
 
 app.synth()
