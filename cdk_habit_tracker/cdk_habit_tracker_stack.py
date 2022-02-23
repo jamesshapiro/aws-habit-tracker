@@ -49,6 +49,8 @@ class CdkHabitTrackerStack(Stack):
             removal_policy=cdk.RemovalPolicy.RETAIN
         )
 
+        topic = sns.Topic(self, "MAUStats")
+
         create_user_function_cdk = lambda_.Function(
             self, 'HabitsCreateUserCDK',
             runtime=lambda_.Runtime.PYTHON_3_9,
@@ -58,7 +60,8 @@ class CdkHabitTrackerStack(Stack):
                 'DDB_TABLE': ddb_table.table_name,
                 'SENDER': f'no-reply@mail.{githabit_domain}',
                 # TODO create this automatically, maybe with custom resources?
-                'UNSUBSCRIBE_URL': f'{api_url}/prod/unsubscribe'
+                'UNSUBSCRIBE_URL': f'{api_url}/prod/unsubscribe',
+                'TOPIC': topic.topic_arn
             },
             timeout=Duration.seconds(30)
         )
@@ -141,8 +144,6 @@ class CdkHabitTrackerStack(Stack):
             ]
         )
         lambda_target = targets.LambdaFunction(email_habit_survey_function_cdk)
-        
-        topic = sns.Topic(self, "MAUCount")
 
         events.Rule(self, "ScheduleRule",
             schedule=events.Schedule.cron(minute="0", hour="4"),
@@ -190,6 +191,7 @@ class CdkHabitTrackerStack(Stack):
 
         ddb_table.grant_read_write_data(post_habit_data_function_cdk)
         topic.grant_publish(post_habit_data_function_cdk)
+        topic.grant_publish(create_user_function_cdk)
         ddb_table.grant_read_write_data(email_habit_survey_function_cdk)
         ddb_table.grant_write_data(fetch_github_data_function_cdk)
         ddb_table.grant_write_data(create_user_function_cdk)
@@ -243,11 +245,13 @@ class CdkHabitTrackerStack(Stack):
                 'DDB_TABLE': ddb_table.table_name,
                 'SENDER': f'no-reply@mail.{githabit_domain}',
                 'ADMIN_EMAIL': email,
+                'TOPIC': topic.topic_arn
             },
             timeout=Duration.seconds(30)
         )
         unsubscribe_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
         ddb_table.grant_read_write_data(unsubscribe_function_cdk)
+        topic.grant_publish(unsubscribe_function_cdk)
 
         unsubscribe_resource = api.root.add_resource(
             'unsubscribe',

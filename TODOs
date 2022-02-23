@@ -5,6 +5,8 @@ High:
 [ ] Add some whitespace to the bottom of the habit graph
 
 Medium:
+[ ] Show "streak" for each habit
+[ ] Center text over habits
 [ ] add a 404 page
 [ ] add "back to grid" button below habit creation UI
 [ ] add "request survey" functionality
@@ -14,8 +16,8 @@ Medium:
 [ ] Add double-unsubscribe page
 [ ] Write a re-subscribe function
 [ ] Fix habit POST method to support updating fields like priority/color/etc. instead of just ignoring them (while respecting original date add)
-[ ] Center text over habits
 [ ] Enable caching of common, valid requests. Use Lambda@Edge for bad requests
+[ ] Configure emails for unsubscribe and reply-to
 
 [ ] Add purge user functionality
 [ ] Add proper social card
@@ -27,6 +29,7 @@ Medium:
 [ ] Create a user settings page with subscribe/unsubscribe option
 [ ] Make older days translucent for new users so that the site is less demoralizing
 [ ] Make the header sticky so that it follows you down the page
+[ ] experiment with warm starts across all AZs in VPC Lambdas
 
 Low:
 [ ] add tooltip to display count

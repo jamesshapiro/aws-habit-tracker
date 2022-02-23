@@ -7,8 +7,10 @@ import datetime
 table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 ses_client = boto3.client('ses')
+sns_client = boto3.client('sns')
 sender = os.environ['SENDER']
 admin_email = os.environ['ADMIN_EMAIL']
+topic = os.environ['TOPIC']
 
 def lambda_handler(event, context):
     user = None
@@ -167,23 +169,11 @@ def lambda_handler(event, context):
             }
         }
     )
-    response = ses_client.send_email(
-        Source= f'GitHabit.com <{sender}>',
-        Destination={
-            'ToAddresses': [
-                admin_email
-            ]
-        },
-        Message={
-            'Subject': {
-                'Data': f'😭 {user} Unsubscribed from GitHabit!'
-            },
-            'Body': {
-                'Html': {
-                    'Data': f'😭 {user} Unsubscribed from GitHabit!'
-                }
-            }
-        }
+    sns = f'{user}-gh-unsubscribe'
+    sns_client.publish(
+        TopicArn=topic,
+        Message=sns,
+        Subject=sns
     )
     print(f'{response=}')
     response_body = {'result': f'Email: {user} was successfully unsubscribed'}

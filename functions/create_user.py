@@ -10,8 +10,11 @@ import time
 table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 ses_client = boto3.client('ses')
+sns_client = boto3.client('sns')
+
 sender = os.environ['SENDER']
 unsubscribe_url = os.environ['UNSUBSCRIBE_URL']
+topic = os.environ['TOPIC']
 
 def get_user(event):
     if 'test_user' in event:
@@ -221,5 +224,11 @@ def lambda_handler(event, context):
                 }
             }
         }
+    )
+    sns = f'{email}-gh-subscribe'
+    sns_client.publish(
+        TopicArn=topic,
+        Message=sns,
+        Subject=sns
     )
     return event

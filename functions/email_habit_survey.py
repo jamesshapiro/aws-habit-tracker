@@ -5,7 +5,8 @@ import datetime
 import hashlib
 import secrets
 import time
-import sys
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 table_name = os.environ['DDB_TABLE']
 
@@ -178,24 +179,22 @@ def lambda_handler(event, context):
 </body>
 </html>
 """
-
-        response = ses_client.send_email(
-            Source= f'GitHabit.com <{sender}>',
-            Destination={
-                'ToAddresses': [
-                    subscriber
-                ]
-            },
-            Message={
-                'Subject': {
-                    'Data': f'📆🐇 Habits Survey: {email_month} {email_day}, {year}'
-                },
-                'Body': {
-                    'Html': {
-                        'Data': message
-                    }
-                }
-            }
+        msg = MIMEMultipart()
+        msg["Subject"] = f'📆🐇 Habits Survey: {email_month} {email_day}, {year}'
+        #msg["From"] = sender
+        msg["From"] = f'GitHabit.com <{sender}>'
+        msg["To"] = subscriber
+        body_txt = MIMEText(message, "html")
+        msg.attach(body_txt)
+        msg['Reply-To'] = 'GitHabit <yes-reply@mail.githabit.com>'
+        mail_unsubscribe_link = 'mailto: unsubscribe@mail.githabit.com?subject=unsubscribe'
+        #msg['list-unsubscribe'] = f'<{mail_unsubscribe_link}>, <{unsubscribe_link}>'
+        msg.add_header('List-Unsubscribe', f'<{mail_unsubscribe_link}>, <{unsubscribe_link}>')
+        msg.add_header('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click')
+        response = ses_client.send_raw_email(
+            Source = f'GitHabit.com <{sender}>', 
+            Destinations = [subscriber],
+            RawMessage = {"Data": msg.as_string()}
         )
     print(f'{response=}')
     return {
