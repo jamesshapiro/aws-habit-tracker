@@ -333,10 +333,7 @@ class App extends React.Component {
               </span>
             </span>
             <span className="right-elem">
-              <span
-                className="nav-bar-cell clickable"
-                id="login-logout-button"
-              >
+              <span className="nav-bar-cell clickable" id="login-logout-button">
                 <Link to="/">Back to Grid!</Link>
               </span>
             </span>
@@ -344,6 +341,7 @@ class App extends React.Component {
           <span className="demo-user">🐇 Keep it up! 🥕</span>
           {this.state.isMounted && this.getEditHabitsUI()}
         </div>
+        <div className="blank-footer" />
       </div>
     ) 
   }
@@ -365,10 +363,7 @@ class App extends React.Component {
               </span>
             </span>
             <span className="right-elem">
-              <span
-                className="nav-bar-cell clickable"
-                id="login-logout-button"
-              >
+              <span className="nav-bar-cell clickable" id="login-logout-button">
                 <Link to="/login">Login/Signup</Link>
               </span>
             </span>
@@ -378,13 +373,14 @@ class App extends React.Component {
           </div>
           {this.state.isMounted && this.getHabitGraphs()}
         </div>
+        <div className="blank-footer" />
       </div>
     )
   }
 
   getLoggedInMode = () => {
     return (
-      <div>
+      <>
         <div className="App">
           <div className="nav-bar-div">
             <span className="left-elem">
@@ -402,10 +398,7 @@ class App extends React.Component {
               </span>
             </span>
             <span className="right-elem">
-              <span
-                className="nav-bar-cell clickable"
-                id="login-logout-button"
-              >
+              <span className="nav-bar-cell clickable" id="login-logout-button">
                 <Link to="/edit-habits">Edit Habits</Link>
               </span>
             </span>
@@ -415,7 +408,8 @@ class App extends React.Component {
           </div>
           {this.state.isMounted && this.getHabitGraphs()}
         </div>
-      </div>
+        <div className="blank-footer" />
+      </>
     )
   }
 
