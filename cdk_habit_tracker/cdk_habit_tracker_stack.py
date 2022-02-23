@@ -103,12 +103,13 @@ class CdkHabitTrackerStack(Stack):
             cognito_user_pools=[user_pool]
         )
 
-        client = user_pool.add_client('app-client',
+        app_client = user_pool.add_client('app-client',
             access_token_validity=Duration.days(1),
             supported_identity_providers=[cognito.UserPoolClientIdentityProvider.COGNITO],
             id_token_validity=Duration.days(1),
             prevent_user_existence_errors=True,
-            refresh_token_validity=Duration.days(30)
+            refresh_token_validity=Duration.days(30),
+            auth_flows=cognito.AuthFlow(user_password=True, user_srp=True)
         )
 
         CfnOutput(self, f'habits-ddb-table-name', value=ddb_table.table_name)
@@ -135,7 +136,7 @@ class CdkHabitTrackerStack(Stack):
         )
 
         email_habit_survey_policy = iam.Policy(
-            self, 'cdk-habits-cognito-list-users',
+            self, 'cdk-habits-send-email',
             statements=[
                 iam.PolicyStatement(
                     actions=['ses:SendEmail','ses:SendRawEmail'],
@@ -187,8 +188,7 @@ class CdkHabitTrackerStack(Stack):
         )
 
         email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
-        create_user_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
-
+        
         ddb_table.grant_read_write_data(post_habit_data_function_cdk)
         topic.grant_publish(post_habit_data_function_cdk)
         topic.grant_publish(create_user_function_cdk)
@@ -249,7 +249,6 @@ class CdkHabitTrackerStack(Stack):
             },
             timeout=Duration.seconds(30)
         )
-        unsubscribe_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
         ddb_table.grant_read_write_data(unsubscribe_function_cdk)
         topic.grant_publish(unsubscribe_function_cdk)
 
@@ -547,24 +546,6 @@ class CdkHabitTrackerStack(Stack):
             compatible_architectures=[lambda_.Architecture.X86_64]
         )
 
-        lambda_edge_warmer_cdk = lambda_.Function(
-            self, 'LambdaEdgeWarmer',
-            runtime=lambda_.Runtime.PYTHON_3_9,
-            code=lambda_.Code.from_asset('lambda_edge'),
-            handler='lambda_edge_warmer.lambda_handler',
-            environment={
-                'URL': githabit_domain,
-                'TEST_USERNAME': test_username,
-                'TEST_PASSWORD': test_password
-            },
-            timeout=Duration.seconds(30),
-            layers=[requests_layer]
-        )
-        lambda_target = targets.LambdaFunction(lambda_edge_warmer_cdk)
-        events.Rule(self, "WarmLambdaEdgeCronRule",
-            schedule=events.Schedule.cron(minute='*', hour='*'),
-            targets=[lambda_target]
-        )
         lambda_target = targets.LambdaFunction(get_habit_function_cdk)
         events.Rule(self, "WarmGetHabitsCronRule",
             schedule=events.Schedule.cron(minute='*/2', hour='*'),
@@ -573,5 +554,39 @@ class CdkHabitTrackerStack(Stack):
         lambda_target = targets.LambdaFunction(get_habit_data_auth_function_cdk)
         events.Rule(self, "WarmGetHabitDataCronRule",
             schedule=events.Schedule.cron(minute='*/2', hour='*'),
+            targets=[lambda_target]
+        )
+
+        vpc_lambda_warmer_policy = iam.Policy(
+            self, 'cdk-habits-cognito-log-in',
+            statements=[
+                iam.PolicyStatement(
+                    actions=['cognito-idp:InitiateAuth'],
+                    resources=[user_pool.user_pool_arn]
+                )
+            ]
+        )
+
+        vpc_lambda_warmer_cdk = lambda_.Function(
+            self, 'VPCLambdaWarmer',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            code=lambda_.Code.from_asset('lambda_edge'),
+            handler='warm_function_vpc.lambda_handler',
+            environment={
+                'WEBSITE_URL': githabit_domain,
+                'TEST_USERNAME': test_username,
+                'TEST_PASSWORD': test_password,
+                'USER_POOL_ID': user_pool.user_pool_id,
+                'APP_CLIENT_ID': app_client.user_pool_client_id,
+                'API_URL': api_url
+            },
+            timeout=Duration.seconds(30),
+            layers=[requests_layer]
+        )
+        vpc_lambda_warmer_cdk.role.attach_inline_policy(vpc_lambda_warmer_policy)
+
+        lambda_target = targets.LambdaFunction(vpc_lambda_warmer_cdk)
+        events.Rule(self, "WarmLambdaEdgeCronRule",
+            schedule=events.Schedule.cron(minute='*', hour='*'),
             targets=[lambda_target]
         )
