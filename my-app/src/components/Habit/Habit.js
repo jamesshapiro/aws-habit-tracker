@@ -213,55 +213,66 @@ class Habit extends Component {
     return (
       <>
         {!this.props.habit.deletePlanned && (
-          <div className="habit">
-            <div className="habit-title">
-              {this.props.habit.habitDisplayName}
-            </div>
-            <div className="commit-graph" id={`habit-${this.props.idx}`}>
-              {this.state.isMounted && (
-                <ActivityCalendar
-                  color={
-                    colors[
-                      (this.props.idx - this.props.startIdx + colors.length) %
-                        colors.length
-                    ]
-                  }
-                  // to hide day-of, add -1 argument
+          <div className="habit-container">
+            <div className="habit">
+              <div className="habit-title">
+                {this.props.habit.habitDisplayName}
+              </div>
+              <div className="commit-graph" id={`habit-${this.props.idx}`}>
+                {this.state.isMounted && (
+                  <ActivityCalendar
+                    color={
+                      colors[
+                        (this.props.idx - this.props.startIdx + colors.length) %
+                          colors.length
+                      ]
+                    }
+                    // to hide day-of, add -1 argument
 
-                  data={
-                    this.state.abridgeLast
-                      ? this.state.dataPoints.slice(-numDaysToFetch, -1)
-                      : this.state.dataPoints.slice(-numDaysToFetch,)
-                  }
-                  //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
-                  hideColorLegend={false}
-                  hideTotalCount={true}
-                  showWeekdayLabels={true}
-                  labels={{
-                    legend: {
-                      less: 'Less',
-                      more: 'More',
-                    },
-                    months: [
-                      'Jan',
-                      'Feb',
-                      'Mar',
-                      'Apr',
-                      'May',
-                      'Jun',
-                      'Jul',
-                      'Aug',
-                      'Sep',
-                      'Oct',
-                      'Nov',
-                      'Dec',
-                    ],
-                    totalCount: '{{count}} days of 8+ hours sleep in {{year}}',
-                    weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                  }}
-                  theme={mytheme}
-                ></ActivityCalendar>
-              )}
+                    data={
+                      this.state.abridgeLast
+                        ? this.state.dataPoints.slice(-numDaysToFetch, -1)
+                        : this.state.dataPoints.slice(-numDaysToFetch)
+                    }
+                    //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
+                    hideColorLegend={false}
+                    hideTotalCount={true}
+                    showWeekdayLabels={true}
+                    labels={{
+                      legend: {
+                        less: 'Less',
+                        more: 'More',
+                      },
+                      months: [
+                        'Jan',
+                        'Feb',
+                        'Mar',
+                        'Apr',
+                        'May',
+                        'Jun',
+                        'Jul',
+                        'Aug',
+                        'Sep',
+                        'Oct',
+                        'Nov',
+                        'Dec',
+                      ],
+                      totalCount:
+                        '{{count}} days of 8+ hours sleep in {{year}}',
+                      weekdays: [
+                        'Sun',
+                        'Mon',
+                        'Tue',
+                        'Wed',
+                        'Thu',
+                        'Fri',
+                        'Sat',
+                      ],
+                    }}
+                    theme={mytheme}
+                  ></ActivityCalendar>
+                )}
+              </div>
             </div>
           </div>
         )}

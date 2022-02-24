@@ -40,6 +40,7 @@ class CdkHabitTrackerStack(Stack):
             api_url=[line for line in lines if line.startswith('api_url')][0].split('=')[1]
             test_username=[line for line in lines if line.startswith('test_username')][0].split('=')[1]
             test_password=[line for line in lines if line.startswith('test_password')][0].split('=')[1]
+            config_set_name=[line for line in lines if line.startswith('config_set_name')][0].split('=')[1]
         ddb_table = dynamodb.Table(
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
@@ -130,7 +131,8 @@ class CdkHabitTrackerStack(Stack):
                 'DDB_TABLE': ddb_table.table_name,
                 'SENDER': f'no-reply@mail.{githabit_domain}',
                 # TODO create this automatically, maybe with custom resources?
-                'UNSUBSCRIBE_URL': f'{api_url}/prod/unsubscribe'
+                'UNSUBSCRIBE_URL': f'{api_url}/prod/unsubscribe',
+                'CONFIG_SET_NAME': config_set_name
             },
             timeout=Duration.minutes(15)
         )
@@ -140,7 +142,10 @@ class CdkHabitTrackerStack(Stack):
             statements=[
                 iam.PolicyStatement(
                     actions=['ses:SendEmail','ses:SendRawEmail'],
-                    resources=[f'arn:aws:ses:{Aws.REGION}:{Aws.ACCOUNT_ID}:identity/{githabit_domain}']
+                    resources=[
+                        f'arn:aws:ses:{Aws.REGION}:{Aws.ACCOUNT_ID}:identity/{githabit_domain}',
+                        f'arn:aws:ses:{Aws.REGION}:{Aws.ACCOUNT_ID}:configuration-set/{config_set_name}'
+                    ]
                 )
             ]
         )
@@ -423,7 +428,8 @@ class CdkHabitTrackerStack(Stack):
             certificate = certificatemanager.DnsValidatedCertificate(
                 self, f'{subdomain}-certificate',
                 domain_name=subdomain,
-                hosted_zone=zone
+                hosted_zone=zone,
+                subject_alternative_names=[f'*.{subdomain}']
             )
             distribution = cloudfront.Distribution(
                 self, f'{subdomain}-distribution',
@@ -473,13 +479,20 @@ class CdkHabitTrackerStack(Stack):
             site_bucket = s3.Bucket(
                 self, f'{subdomain}-bucket',
             )
+            kwargs = {}
+            if subdomain == githabit_domain:      
+                kwargs = {
+                    "subject_alternative_names": [f'www.{githabit_domain}'],
+                }
             certificate = certificatemanager.DnsValidatedCertificate(
                 self, f'{subdomain}-certificate',
                 domain_name=subdomain,
-                hosted_zone=githabit_zone
+                hosted_zone=githabit_zone,
+                **kwargs
             )
             
             kwargs = {}
+            domain_names = [subdomain]
             if subdomain == githabit_domain:
                 server_router_function = cloudfront.experimental.EdgeFunction(self, "HabitsServerRouter",
                     runtime=lambda_.Runtime.PYTHON_3_9,
@@ -492,6 +505,7 @@ class CdkHabitTrackerStack(Stack):
                         event_type=cloudfront.LambdaEdgeEventType.VIEWER_REQUEST)
                     ],
                 }
+                domain_names.append(f'www.{githabit_domain}')
             
             distribution = cloudfront.Distribution(
                 self, f'{subdomain}-distribution',
@@ -518,7 +532,7 @@ class CdkHabitTrackerStack(Stack):
                 # ],
                 comment=f'{subdomain} S3 HTTPS',
                 default_root_object='index.html',
-                domain_names=[subdomain],
+                domain_names=domain_names,
                 certificate=certificate
             )
             CfnOutput(self, f'{subdomain}-cf-distribution', value=distribution.distribution_id)
@@ -536,7 +550,7 @@ class CdkHabitTrackerStack(Stack):
                 route53.CnameRecord(
                     self, f'www-{githabit_domain}-alias-record',
                     zone=githabit_zone,
-                    domain_name=githabit_domain,
+                    domain_name=f'{githabit_domain}.',
                     record_name=f'www.{subdomain}'
                 )
             
@@ -544,17 +558,6 @@ class CdkHabitTrackerStack(Stack):
             removal_policy=cdk.RemovalPolicy.DESTROY,
             code=lambda_.Code.from_asset('layers/requestspython39.zip'),
             compatible_architectures=[lambda_.Architecture.X86_64]
-        )
-
-        lambda_target = targets.LambdaFunction(get_habit_function_cdk)
-        events.Rule(self, "WarmGetHabitsCronRule",
-            schedule=events.Schedule.cron(minute='*/2', hour='*'),
-            targets=[lambda_target]
-        )
-        lambda_target = targets.LambdaFunction(get_habit_data_auth_function_cdk)
-        events.Rule(self, "WarmGetHabitDataCronRule",
-            schedule=events.Schedule.cron(minute='*/2', hour='*'),
-            targets=[lambda_target]
         )
 
         vpc_lambda_warmer_policy = iam.Policy(

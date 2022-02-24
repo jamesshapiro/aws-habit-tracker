@@ -54,7 +54,7 @@
   font-weight: lighter;
 }
 
-@media only screen and (max-width: 750px) {
+@media only screen and (max-width: 850px) {
   .nav-bar-cell {
     margin-right: 10px;
   }
@@ -98,8 +98,9 @@
 }
 
 .habit {
-  margin: 10px 0 0 0px;
-  width: 95%;
+  margin: 10px 38px 0 0px;
+  display: inline-block;
+  /* width: 95%; */
 }
 
 .to-delete {
@@ -128,16 +129,18 @@
 
 .commit-graph {
   margin-left: 50px;
+  display: inline-block;
 }
 
 .habit-title {
-  margin-left: 14px;
+  margin-left: 33px;
   display: block;
   font-size: 1.17em;
   margin-top: 1em;
-  margin-bottom: 1em;
+  margin-bottom: 6px;
   margin-right: 0;
   font-weight: bold;
+  text-align: center;
 }
 
 .back-to-grid-body {

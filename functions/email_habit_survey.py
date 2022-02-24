@@ -13,6 +13,7 @@ table_name = os.environ['DDB_TABLE']
 ses_client = boto3.client('ses')
 ddb_client = boto3.client('dynamodb')
 unsubscribe_url = os.environ['UNSUBSCRIBE_URL']
+config_set_name = os.environ['CONFIG_SET_NAME']
 
 months = {
     '01': 'January',
@@ -194,7 +195,8 @@ def lambda_handler(event, context):
         response = ses_client.send_raw_email(
             Source = f'GitHabit.com <{sender}>', 
             Destinations = [subscriber],
-            RawMessage = {"Data": msg.as_string()}
+            RawMessage = {"Data": msg.as_string()},
+            ConfigurationSetName=config_set_name
         )
     print(f'{response=}')
     return {

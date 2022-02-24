@@ -1,8 +1,6 @@
 High:
-[ ] Create a UI for logging habits in the past
 [ ] Make habits draggable in edit mode
 [ ] Add an about page
-[ ] Add some whitespace to the bottom of the habit graph
 
 Medium:
 [ ] Show "streak" for each habit
@@ -21,22 +19,28 @@ Medium:
 
 [ ] Add purge user functionality
 [ ] Add proper social card
-[ ] Add ability to restore deleted habits
 [ ] Support alert confirmation for deleting habit
 [ ] Handle habit submission with ENTER keypress
-[ ] Redirect www.githabit.com to homepage
 [ ] Re-style the survey form
 [ ] Create a user settings page with subscribe/unsubscribe option
 [ ] Make older days translucent for new users so that the site is less demoralizing
 [ ] Make the header sticky so that it follows you down the page
 [ ] experiment with warm starts across all AZs in VPC Lambdas
+[ ] Create a UI for logging habits in the past
+[ ] Add ability to restore deleted habits
 
 Low:
-[ ] add tooltip to display count
 [ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
-[ ] add square comments
 [ ] auto-configure the Cognito domain from CDK rather than doing it manually through the console.
 [ ] write a custom resource to handle DKIM rather than doing it manually through the console. https://docs.aws.amazon.com/ses/latest/APIReference/API_VerifyDomainIdentity.html
+
+Easy:
+
+Medium:
+
+Difficult:
+[ ] add tooltip to display count
+[ ] add square comments
 
 ======================================================
 [x] Implement reminder form w/ token
@@ -94,3 +98,5 @@ Low:
 [x] Add padding + rounded corners to create habit UI items
 [x] log user sign-up date
 [x] Fix 404 issue by using Lambda@Edge with CF
+[x] Add some whitespace to the bottom of the habit graph
+[x] Redirect www.githabit.com to homepage
