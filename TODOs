@@ -4,6 +4,7 @@ High:
 [ ] Show "streak" for each habit
 
 Medium:
+[ ] Change code to load habit graphs quickly, then populate with data after
 [ ] add a navbar
 [ ] add an aesthetic 404 page
 [ ] add "back to grid" button below habit creation UI

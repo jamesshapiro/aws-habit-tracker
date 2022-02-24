@@ -219,7 +219,7 @@ class Habit extends Component {
                 {this.props.habit.habitDisplayName}
               </div>
               <div className="commit-graph" id={`habit-${this.props.idx}`}>
-                {this.state.isMounted && (
+                {(
                   <ActivityCalendar
                     color={
                       colors[

@@ -1,3 +1,7 @@
 # cdk-habit-tracker
 
-![Habit Tracker Screenshot 1](habit-tracker-readme-pic-1.png?raw=true 'Habit Tracker')
+## Desktop View
+![Habit Tracker Desktop View](desktop-view.png?raw=true 'Habit Tracker Desktop View')
+
+## Mobile View
+![Habit Tracker Mobile View](mobile-view.png?raw=true 'Habit Tracker Mobile View')

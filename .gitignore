@@ -16,3 +16,4 @@ delete_habit.py
 migrate_data.py
 my-app/amplify/*
 .cdk-params
+.vscode/*
