@@ -4,7 +4,6 @@ High:
 [ ] Show "streak" for each habit
 
 Medium:
-[ ] Change code to load habit graphs quickly, then populate with data after
 [ ] add a navbar
 [ ] add an aesthetic 404 page
 [ ] add "back to grid" button below habit creation UI
@@ -103,3 +102,4 @@ Difficult:
 [x] Point www.githabit.com to CF distro for githabit.com (update cert + distro with www and add Route53 record)
 [x] Use Lambda@Edge function to 301 redirect www to apex domain
 [x] Center text over habits
+[x] Change code to load habit graphs quickly, then populate with data after

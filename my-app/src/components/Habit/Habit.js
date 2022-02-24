@@ -102,6 +102,13 @@ class Habit extends Component {
     const yyyymmdd = `${yyyy}-${mm}-${dd}`
     const numDaysToFetchFromDDB = 373
     var daysOfYear = this.getDaysOfYear(user, this.props.habit.habitName)
+    let abridgeLast = true
+    let newState = {
+      dataPoints: [...daysOfYear],
+      isMounted: false,
+      abridgeLast,
+    }
+    this.setState(newState)
     if (user !== 'display') {
       const username = user.attributes.email.replace('@', '%40')
       const token = user.signInUserSession.idToken.jwtToken
@@ -112,7 +119,6 @@ class Habit extends Component {
       var url =
         process.env.REACT_APP_GET_HABIT_DATA_AUTH_URL +
         `?user=${username}&PK1=${this.props.habit.habitName}&limit=${numDaysToFetchFromDDB}&startkey=${yyyymmdd}`
-
       fetch(url, {
         method: 'GET',
         headers: headers,
@@ -126,7 +132,7 @@ class Habit extends Component {
               level: Math.min(parseInt(item.DATE_LEVEL.S), 4),
             }
           })
-          let abridgeLast = true
+          abridgeLast = true
           const todayDateString = this.getTodayDateString()
           dataItems.map((item) => {
             daysOfYear.forEach((dayOfYear) => {
@@ -141,7 +147,7 @@ class Habit extends Component {
               abridgeLast = false
             }
           })
-          const newState = {
+          newState = {
             dataPoints: [...daysOfYear],
             isMounted: true,
             abridgeLast
@@ -219,7 +225,7 @@ class Habit extends Component {
                 {this.props.habit.habitDisplayName}
               </div>
               <div className="commit-graph" id={`habit-${this.props.idx}`}>
-                {(
+                {
                   <ActivityCalendar
                     color={
                       colors[
@@ -234,6 +240,8 @@ class Habit extends Component {
                         ? this.state.dataPoints.slice(-numDaysToFetch, -1)
                         : this.state.dataPoints.slice(-numDaysToFetch)
                     }
+
+                    loading={!this.state.isMounted}
                     //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
                     hideColorLegend={false}
                     hideTotalCount={true}
@@ -271,7 +279,7 @@ class Habit extends Component {
                     }}
                     theme={mytheme}
                   ></ActivityCalendar>
-                )}
+                }
               </div>
             </div>
           </div>
