@@ -15,9 +15,9 @@ CONTENT = """
 
 def get_page_not_found(uri):
     return {
-        "status": '404',
-        "statusDescription": 'Page Not Found',
-        "body": CONTENT.format(uri)
+        'status': '404',
+        'statusDescription': 'Page Not Found',
+        'body': CONTENT.format(uri)
     }
 
 whitelist = [
@@ -44,6 +44,24 @@ prefix_whitelist = [
 def lambda_handler(event, context):
     request = event['Records'][0]['cf']['request']
     uri = event['Records'][0]['cf']['request']['uri']
+    if request['headers']['host'][0]['value'] in [
+        'www.githabit.com',
+        'www.githabit.com/',
+        'http://www.githabit.com',
+        'http://www.githabit.com/',
+        'https://www.githabit.com',
+        'https://www.githabit.com/'
+    ]:
+        return {
+            'status': '301',
+            'statusDescription': 'Redirecting to apex domain',
+            'headers': {
+                'location': [{
+                    'key': 'Location',
+                    'value': f'https://githabit.com{uri}'
+                }]
+            }
+        }
     result = get_page_not_found(uri)
     if uri in whitelist:
         result = request
