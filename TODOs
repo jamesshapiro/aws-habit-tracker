@@ -1,11 +1,11 @@
 High:
 [ ] Make habits draggable in edit mode
 [ ] Add an about page
+[ ] Show "streak" for each habit
 
 Medium:
-[ ] Show "streak" for each habit
-[ ] Center text over habits
-[ ] add a 404 page
+[ ] add a navbar
+[ ] add an aesthetic 404 page
 [ ] add "back to grid" button below habit creation UI
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
@@ -20,7 +20,6 @@ Medium:
 [ ] Add purge user functionality
 [ ] Add proper social card
 [ ] Support alert confirmation for deleting habit
-[ ] Handle habit submission with ENTER keypress
 [ ] Re-style the survey form
 [ ] Create a user settings page with subscribe/unsubscribe option
 [ ] Make older days translucent for new users so that the site is less demoralizing
@@ -35,6 +34,7 @@ Low:
 [ ] write a custom resource to handle DKIM rather than doing it manually through the console. https://docs.aws.amazon.com/ses/latest/APIReference/API_VerifyDomainIdentity.html
 
 Easy:
+[ ] Handle habit submission with ENTER keypress
 
 Medium:
 
@@ -99,4 +99,6 @@ Difficult:
 [x] log user sign-up date
 [x] Fix 404 issue by using Lambda@Edge with CF
 [x] Add some whitespace to the bottom of the habit graph
-[x] Redirect www.githabit.com to homepage
+[x] Point www.githabit.com to CF distro for githabit.com (update cert + distro with www and add Route53 record)
+[x] Use Lambda@Edge function to 301 redirect www to apex domain
+[x] Center text over habits
