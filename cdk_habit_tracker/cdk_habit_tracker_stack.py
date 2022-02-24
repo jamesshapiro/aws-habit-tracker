@@ -573,7 +573,7 @@ class CdkHabitTrackerStack(Stack):
         vpc_lambda_warmer_cdk = lambda_.Function(
             self, 'VPCLambdaWarmer',
             runtime=lambda_.Runtime.PYTHON_3_9,
-            code=lambda_.Code.from_asset('lambda_edge'),
+            code=lambda_.Code.from_asset('functions'),
             handler='warm_function_vpc.lambda_handler',
             environment={
                 'WEBSITE_URL': githabit_domain,
@@ -584,6 +584,7 @@ class CdkHabitTrackerStack(Stack):
                 'API_URL': api_url
             },
             timeout=Duration.seconds(30),
+            memory_size=128,
             layers=[requests_layer]
         )
         vpc_lambda_warmer_cdk.role.attach_inline_policy(vpc_lambda_warmer_policy)
