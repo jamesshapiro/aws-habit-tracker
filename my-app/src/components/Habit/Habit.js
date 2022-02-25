@@ -103,8 +103,9 @@ class Habit extends Component {
     const numDaysToFetchFromDDB = 373
     var daysOfYear = this.getDaysOfYear(user, this.props.habit.habitName)
     let abridgeLast = true
+    const numDaysToFetch = this.getNumDaysToFetch()
     let newState = {
-      dataPoints: [...daysOfYear],
+      dataPoints: [...daysOfYear].slice(-numDaysToFetch, -1),
       isMounted: false,
       abridgeLast,
     }
@@ -241,7 +242,7 @@ class Habit extends Component {
                         : this.state.dataPoints.slice(-numDaysToFetch)
                     }
 
-                    loading={!this.state.isMounted}
+                    loading={!this.state.isMounted && numDaysToFetch > 300}
                     //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
                     hideColorLegend={false}
                     hideTotalCount={true}
