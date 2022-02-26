@@ -13,11 +13,13 @@ def grab_data(url):
     return [(elem.attrs['data-date'], elem.attrs['data-count']) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if 'data-count' in elem.attrs]
 
 def lambda_handler(event, context):
-    print(f'{event=}')
-    body = event['body']
-    print(f'{body=}')
-    habits_user = body['habits_user']
-    github_username = body['github_user']
+    #print(f'{event=}')
+    #body = event['body']
+    #print(f'{body=}')
+    #habits_user = body['habits_user']
+    #github_username = body['github_user']
+    habits_user = 'james.shapiro@gmail.com'
+    github_username = 'jamesshapiro'
     url = f'https://github.com/{github_username}'
     for user in [habits_user, 'display']:
         response = ddb_client.put_item(

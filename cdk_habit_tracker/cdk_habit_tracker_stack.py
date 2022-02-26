@@ -28,19 +28,19 @@ class CdkHabitTrackerStack(Stack):
             lines = f.read().splitlines()
             # .cdk-params should be of the form:
             # email=john@example.com
-            email = [line for line in lines if line.startswith('email')][0].split('=')[1]
-            habits_subdomain_name = [line for line in lines if line.startswith('habits_subdomain_name')][0].split('=')[1]
-            habits_survey_subdomain_name = [line for line in lines if line.startswith('habits_survey_subdomain_name')][0].split('=')[1]
-            hosted_zone_id = [line for line in lines if line.startswith('hosted_zone_id')][0].split('=')[1]
-            zone_name = [line for line in lines if line.startswith('zone_name')][0].split('=')[1]
-            githabit_domain=[line for line in lines if line.startswith('githabit_domain')][0].split('=')[1]
-            githabit_survey_domain=[line for line in lines if line.startswith('githabit_survey_domain')][0].split('=')[1]
-            githabit_zone=[line for line in lines if line.startswith('githabit_zone')][0].split('=')[1]
-            githabit_zone_id=[line for line in lines if line.startswith('githabit_zone_id')][0].split('=')[1]
-            api_url=[line for line in lines if line.startswith('api_url')][0].split('=')[1]
-            test_username=[line for line in lines if line.startswith('test_username')][0].split('=')[1]
-            test_password=[line for line in lines if line.startswith('test_password')][0].split('=')[1]
-            config_set_name=[line for line in lines if line.startswith('config_set_name')][0].split('=')[1]
+            email = [line for line in lines if line.startswith('email=')][0].split('=')[1]
+            habits_subdomain_name = [line for line in lines if line.startswith('habits_subdomain_name=')][0].split('=')[1]
+            habits_survey_subdomain_name = [line for line in lines if line.startswith('habits_survey_subdomain_name=')][0].split('=')[1]
+            hosted_zone_id = [line for line in lines if line.startswith('hosted_zone_id=')][0].split('=')[1]
+            zone_name = [line for line in lines if line.startswith('zone_name=')][0].split('=')[1]
+            githabit_domain=[line for line in lines if line.startswith('githabit_domain=')][0].split('=')[1]
+            githabit_survey_domain=[line for line in lines if line.startswith('githabit_survey_domain=')][0].split('=')[1]
+            githabit_zone=[line for line in lines if line.startswith('githabit_zone=')][0].split('=')[1]
+            githabit_zone_id=[line for line in lines if line.startswith('githabit_zone_id=')][0].split('=')[1]
+            api_url=[line for line in lines if line.startswith('api_url=')][0].split('=')[1]
+            test_username=[line for line in lines if line.startswith('test_username=')][0].split('=')[1]
+            test_password=[line for line in lines if line.startswith('test_password=')][0].split('=')[1]
+            config_set_name=[line for line in lines if line.startswith('config_set_name=')][0].split('=')[1]
         ddb_table = dynamodb.Table(
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),
@@ -193,6 +193,7 @@ class CdkHabitTrackerStack(Stack):
         )
 
         email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
+        create_user_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
         
         ddb_table.grant_read_write_data(post_habit_data_function_cdk)
         topic.grant_publish(post_habit_data_function_cdk)
@@ -256,6 +257,7 @@ class CdkHabitTrackerStack(Stack):
         )
         ddb_table.grant_read_write_data(unsubscribe_function_cdk)
         topic.grant_publish(unsubscribe_function_cdk)
+        unsubscribe_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
 
         unsubscribe_resource = api.root.add_resource(
             'unsubscribe',
