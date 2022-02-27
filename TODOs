@@ -1,7 +1,7 @@
 High:
 [ ] Make habits draggable in edit mode
 [ ] Add an about page
-[ ] Show "streak" for each habit
+[ ] Add proper social card w/ React Helmet
 
 Medium:
 [ ] add a navbar
@@ -16,25 +16,26 @@ Medium:
 [ ] Fix habit POST method to support updating fields like priority/color/etc. instead of just ignoring them (while respecting original date add)
 [ ] Enable caching of common, valid requests. Use Lambda@Edge for bad requests
 [ ] Configure emails for unsubscribe and reply-to
+[ ] Create a user settings page with subscribe/unsubscribe option, time zone settings, etc.
 
 [ ] Add purge user functionality
-[ ] Add proper social card
+
 [ ] Support alert confirmation for deleting habit
 [ ] Re-style the survey form
-[ ] Create a user settings page with subscribe/unsubscribe option
+
 [ ] Make older days translucent for new users so that the site is less demoralizing
 [ ] Make the header sticky so that it follows you down the page
 [ ] experiment with warm starts across all AZs in VPC Lambdas
 [ ] Create a UI for logging habits in the past
 [ ] Add ability to restore deleted habits
+[ ] Cache habit data points / data in browser for logged-in users to reduce load time
+[ ] Handle habit submission with ENTER keypress
 
 Low:
 [ ] consider using Lambda authorizer for get survey / post survey functionality with random long token
 [ ] auto-configure the Cognito domain from CDK rather than doing it manually through the console.
 [ ] write a custom resource to handle DKIM rather than doing it manually through the console. https://docs.aws.amazon.com/ses/latest/APIReference/API_VerifyDomainIdentity.html
-
-Easy:
-[ ] Handle habit submission with ENTER keypress
+[ ] fix firefox formatting
 
 Medium:
 
@@ -103,3 +104,4 @@ Difficult:
 [x] Use Lambda@Edge function to 301 redirect www to apex domain
 [x] Center text over habits
 [x] Change code to load habit graphs quickly, then populate with data after
+[x] Show "streak" for each habit

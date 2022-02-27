@@ -19,6 +19,39 @@ class Habit extends Component {
       dataPoints: [],
       isMounted: false,
       abridgeLast: false,
+      streak: 0
+    }
+  }
+
+  getTodayDateString() {
+    const today = new Date()
+    const dd = String(today.getDate()).padStart(2, '0')
+    const mm = String(today.getMonth() + 1).padStart(2, '0')
+    const yyyy = today.getFullYear()
+    return `${yyyy}-${mm}-${dd}`
+  }
+
+  getDateFromDateString(dateString) {
+    return new Date(dateString)
+  }
+
+  getStreak = () => {
+    if (this.state.dataPoints.length) {
+      const lastIndex = this.state.abridgeLast ? 2 : 1
+      const newStreak = this.state.dataPoints.slice(lastIndex)[0]
+      let tally = 0
+      for (let i = this.state.dataPoints.length - lastIndex; i > 0; i--) {
+        if (this.state.dataPoints[i].level < 2) {
+          break
+        }
+        tally = tally + 1;
+      }
+      console.log(newStreak)
+      if (tally < 7) {
+        return
+      }
+      return <span className='inner-streak'>{tally} days</span>
+      //this.setState({ streak: newStreak })
     }
   }
 
@@ -49,14 +82,6 @@ class Habit extends Component {
 
     const result = Math.min(lastDigit + secondToLastDigit, 4)
     return result
-  }
-
-  getTodayDateString() {
-    const today = new Date()
-    const dd = String(today.getDate()).padStart(2, '0')
-    const mm = String(today.getMonth() + 1).padStart(2, '0')
-    const yyyy = today.getFullYear()
-    return `${yyyy}-${mm}-${dd}`
   }
 
   getDaysOfYear = (user, habitName) => {
@@ -151,7 +176,7 @@ class Habit extends Component {
           newState = {
             dataPoints: [...daysOfYear],
             isMounted: true,
-            abridgeLast
+            abridgeLast,
           }
           // const newState = { dataPoints: [...daysOfYear], isMounted: true, abridgeLast }
           this.setState(newState)
@@ -202,6 +227,7 @@ class Habit extends Component {
         }
       })
     }
+    
   }
 
   render() {
@@ -223,7 +249,10 @@ class Habit extends Component {
           <div className="habit-container">
             <div className="habit">
               <div className="habit-title">
-                {this.props.habit.habitDisplayName}
+                <span className="habit-name">
+                  {this.props.habit.habitDisplayName}
+                </span>{' '}
+                <span className="outer-streak">{this.getStreak()}</span>
               </div>
               <div className="commit-graph" id={`habit-${this.props.idx}`}>
                 {
@@ -241,7 +270,6 @@ class Habit extends Component {
                         ? this.state.dataPoints.slice(-numDaysToFetch, -1)
                         : this.state.dataPoints.slice(-numDaysToFetch)
                     }
-
                     loading={!this.state.isMounted && numDaysToFetch > 300}
                     //data={this.state.dataPoints.slice(-numDaysToFetch, -1)}
                     hideColorLegend={false}

@@ -5,6 +5,38 @@
   background-color: lightgrey;
 }
 
+.habit-title {
+  margin-left: 33px;
+  display: block;
+  font-size: 1.17em;
+  margin-top: 1em;
+  margin-bottom: 6px;
+  margin-right: 0;
+  font-weight: bold;
+  text-align: center;
+}
+
+.inner-streak {
+  font-size: 10px;
+  display: inline-block;
+  font-weight: bold;
+  padding: 5px;
+  color: white;
+  background-color: rgb(212, 175, 55);
+  border-radius: 5px;
+}
+
+.outer-streak {
+  display: inline-block;
+}
+
+.habit-name {
+  display: inline;
+  margin-right: 4px;
+  position: relative;
+  bottom: -3.5px;
+}
+
 /* h1 values */
 .habit-tracker-header {
   display: inline;
@@ -130,17 +162,6 @@
 .commit-graph {
   margin-left: 50px;
   display: inline-block;
-}
-
-.habit-title {
-  margin-left: 33px;
-  display: block;
-  font-size: 1.17em;
-  margin-top: 1em;
-  margin-bottom: 6px;
-  margin-right: 0;
-  font-weight: bold;
-  text-align: center;
 }
 
 .back-to-grid-body {
