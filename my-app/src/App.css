@@ -10,7 +10,7 @@
   display: block;
   font-size: 1.17em;
   margin-top: 1em;
-  margin-bottom: 6px;
+  margin-bottom: 9px;
   margin-right: 0;
   font-weight: bold;
   text-align: center;
@@ -86,45 +86,6 @@
   font-weight: lighter;
 }
 
-@media only screen and (max-width: 850px) {
-  .nav-bar-cell {
-    margin-right: 10px;
-  }
-
-  /* h1 values */
-  .habit-tracker-header {
-    font-size: 1.17em;
-    margin-left: 10px;
-    font-weight: bold;
-  }
-
-  .clickable {
-    margin-left: 0px;
-    margin-right: 1px;
-    cursor: pointer;
-    padding: 5px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    color: white;
-    background-color: #000;
-    border-radius: 4px;
-    font-size: 0.7em;
-    font-weight: normal;
-  }
-
-  /* h2 values */
-  .demo-user {
-    font-size: 1.17em;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    padding-left: 13px;
-    margin-right: 0;
-  }
-}
-
-/* @media only screen and (max-width: 1200px) {
-} */
-
 .habit-ui-table {
   margin: 10px;
 }
@@ -183,3 +144,64 @@
   height: 6rem;
   background-color: white;
 }
+
+@media only screen and (max-width: 850px) {
+  .habit-title {
+    margin: auto;
+    display: block;
+  }
+
+  .commit-graph {
+    margin: auto;
+    display: block;
+  }
+
+  .habit {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    display: block;
+    width: 280px;
+  }
+
+  .nav-bar-cell {
+    margin-right: 10px;
+  }
+
+  /* h1 values */
+  .habit-tracker-header {
+    font-size: 1.17em;
+    margin-left: 10px;
+    font-weight: bold;
+  }
+
+  .clickable {
+    margin-left: 0px;
+    margin-right: 1px;
+    cursor: pointer;
+    padding: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: white;
+    background-color: #000;
+    border-radius: 4px;
+    font-size: 0.7em;
+    font-weight: normal;
+  }
+
+  /* h2 values */
+  .demo-user {
+    font-size: 1.17em;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 13px;
+    margin-right: 0;
+  }
+
+  .habit-title {
+    margin-bottom: 10px;
+  }
+}
+
+/* @media only screen and (max-width: 1200px) {
+} */
