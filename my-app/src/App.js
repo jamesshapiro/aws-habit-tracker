@@ -286,7 +286,7 @@ class App extends React.Component {
     return (
       <div className="habit-graphs">
         {this.state.habits.map((habit, i) => {
-          return <Habit habit={habit} idx={i} startIdx={this.habitsContainGithub() ? 1 : 0} />
+          return <Habit habit={habit} key={i} idx={i} startIdx={this.habitsContainGithub() ? 1 : 0} />
         })}
       </div>
     )

@@ -46,7 +46,6 @@ class Habit extends Component {
         }
         tally = tally + 1;
       }
-      console.log(newStreak)
       if (tally < 7) {
         return
       }
