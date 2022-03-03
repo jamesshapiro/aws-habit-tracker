@@ -356,22 +356,29 @@ class App extends React.Component {
     return (
       <div>
         <div className="App">
-          <div className="nav-bar-div">
-            <span className="left-elem">
-              <span className="nav-bar-cell habit-tracker-header">
-                Habit Tracker
+          <div className="full-header">
+            <div className="nav-bar-div">
+              <span className="left-elem">
+                <span className="nav-bar-cell habit-tracker-header">
+                  Habit Tracker
+                </span>
               </span>
-            </span>
-            <span className="right-elem">
-              <span className="nav-bar-cell clickable" id="login-logout-button">
-                <Link to="/login">Login/Signup</Link>
+              <span className="right-elem">
+                <span
+                  className="nav-bar-cell clickable"
+                  id="login-logout-button"
+                >
+                  <Link to="/login">Login/Signup</Link>
+                </span>
               </span>
-            </span>
+            </div>
+            <div className="demo-user-div">
+              <span className="demo-user">Roger Habit</span>
+            </div>
           </div>
-          <div className="demo-user-div">
-            <span className="demo-user">Roger Habit</span>
+          <div className="habit-graphs-container">
+            {this.state.isMounted && this.getHabitGraphs()}
           </div>
-          {this.state.isMounted && this.getHabitGraphs()}
         </div>
         <div className="blank-footer" />
       </div>
@@ -382,31 +389,38 @@ class App extends React.Component {
     return (
       <>
         <div className="App">
-          <div className="nav-bar-div">
-            <span className="left-elem">
-              <span className="nav-bar-cell habit-tracker-header">
-                Habit Tracker
+          <div className="full-header">
+            <div className="nav-bar-div">
+              <span className="left-elem">
+                <span className="nav-bar-cell habit-tracker-header">
+                  Habit Tracker
+                </span>
               </span>
-            </span>
-            <span className="right-elem">
-              <span
-                className="nav-bar-cell clickable"
-                id="login-logout-button"
-                onClick={() => signOut()}
-              >
-                <Link to="/">Signout</Link>
+              <span className="right-elem">
+                <span
+                  className="nav-bar-cell clickable"
+                  id="login-logout-button"
+                  onClick={() => signOut()}
+                >
+                  <Link to="/">Signout</Link>
+                </span>
               </span>
-            </span>
-            <span className="right-elem">
-              <span className="nav-bar-cell clickable" id="login-logout-button">
-                <Link to="/edit-habits">Edit Habits</Link>
+              <span className="right-elem">
+                <span
+                  className="nav-bar-cell clickable"
+                  id="login-logout-button"
+                >
+                  <Link to="/edit-habits">Edit Habits</Link>
+                </span>
               </span>
-            </span>
+            </div>
+            <div className="demo-user-div">
+              <span className="demo-user">🐇 Keep it up! 🥕</span>
+            </div>
           </div>
-          <div className="demo-user-div">
-            <span className="demo-user">🐇 Keep it up! 🥕</span>
+          <div className="habit-graphs-container">
+            {this.state.isMounted && this.getHabitGraphs()}
           </div>
-          {this.state.isMounted && this.getHabitGraphs()}
         </div>
         <div className="blank-footer" />
       </>
@@ -418,6 +432,7 @@ class App extends React.Component {
       ? this.getLoggedOutMode()
       : this.getLoggedInMode()
   }
+
   render() {
     const validPaths = ['', '/login', '/edit-habits']
     validPaths.forEach((item) =>

@@ -26,6 +26,17 @@
   border-radius: 5px;
 }
 
+.full-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.habit-graphs-container {
+  margin-top: 96px;
+}
+
 .outer-streak {
   display: inline-block;
 }
@@ -200,6 +211,10 @@
 
   .habit-title {
     margin-bottom: 10px;
+  }
+
+  .habit-graphs-container {
+    margin-top: 66px;
   }
 }
 

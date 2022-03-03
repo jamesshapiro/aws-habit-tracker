@@ -10,7 +10,6 @@ Medium:
 [ ] add "request survey" functionality
 [ ] Add other fields to add-habit UI aside from habit name
 [ ] Add a proper unsubscribe page
-[ ] Send raw emails with List-Unsubscribe header
 [ ] Add double-unsubscribe page
 [ ] Write a re-subscribe function
 [ ] Fix habit POST method to support updating fields like priority/color/etc. instead of just ignoring them (while respecting original date add)
@@ -24,7 +23,6 @@ Medium:
 [ ] Re-style the survey form
 
 [ ] Make older days translucent for new users so that the site is less demoralizing
-[ ] Make the header sticky so that it follows you down the page
 [ ] experiment with warm starts across all AZs in VPC Lambdas
 [ ] Create a UI for logging habits in the past
 [ ] Add ability to restore deleted habits
@@ -105,3 +103,5 @@ Difficult:
 [x] Center text over habits
 [x] Change code to load habit graphs quickly, then populate with data after
 [x] Show "streak" for each habit
+[x] Send raw emails with List-Unsubscribe header
+[x] Make the header sticky so that it follows you down the page
