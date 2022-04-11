@@ -22,7 +22,6 @@ Medium:
 [ ] Support alert confirmation for deleting habit
 [ ] Re-style the survey form
 
-[ ] Make older days translucent for new users so that the site is less demoralizing
 [ ] experiment with warm starts across all AZs in VPC Lambdas
 [ ] Create a UI for logging habits in the past
 [ ] Add ability to restore deleted habits

@@ -180,17 +180,18 @@ class CdkHabitTrackerStack(Stack):
             layers=[scrape_layer]
         )
 
-        fetch_github_target = targets.LambdaFunction(
-            fetch_github_data_function_cdk,
-            # TODO: Parameterize
-            event=events.RuleTargetInput.from_object({
-                'body': {'habits_user':email, 'github_user': 'jamesshapiro'}
-            })
-        )
-        events.Rule(self, "GitHubFetchScheduleRule",
-            schedule=events.Schedule.cron(minute="*/5", hour="4,5,6,7"),
-            targets=[fetch_github_target]
-        )
+        # Remove the event because I always manually invoke this function anyway
+        # fetch_github_target = targets.LambdaFunction(
+        #     fetch_github_data_function_cdk,
+        #     # TODO: Parameterize
+        #     event=events.RuleTargetInput.from_object({
+        #         'body': {'habits_user':email, 'github_user': 'jamesshapiro'}
+        #     })
+        # )
+        # events.Rule(self, "GitHubFetchScheduleRule",
+        #     schedule=events.Schedule.cron(minute="*/5", hour="4,5,6,7"),
+        #     targets=[fetch_github_target]
+        # )
 
         email_habit_survey_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
         create_user_function_cdk.role.attach_inline_policy(email_habit_survey_policy)
@@ -522,7 +523,7 @@ class CdkHabitTrackerStack(Stack):
                         http_status=403,
                         response_http_status=200,
                         response_page_path="/index.html",
-                        ttl=cdk.Duration.minutes(30)
+                        ttl=Duration.minutes(30)
                     )
                 ],
                 #     cloudfront.ErrorResponse(

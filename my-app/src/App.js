@@ -3,10 +3,7 @@
 // PROD: aws s3 cp --recursive build/ s3://cdkhabits-githabitcombucket6a79c338-hk3nkues0h5f
 // PROD: aws cloudfront create-invalidation --distribution-id E2WZ67Q81CV1B5 --paths "/*"
 // FFB: npm run build && aws s3 cp --recursive build/ s3://cdkhabits-githabitcombucket6a79c338-hk3nkues0h5f && aws cloudfront create-invalidation --distribution-id E2WZ67Q81CV1B5 --paths "/*"
-/////////////////PROD//////////////////
-// npm run build
-// DEV: aws s3 cp --recursive build/ s3://cdkhabits-habitsweakerpotionscombucketdff06391-116yh481gtpp6
-// DEV: aws cloudfront create-invalidation --distribution-id E70XD704NPJDM --paths "/*"
+
 import './App.css'
 import React from 'react'
 import Habit from './components/Habit/Habit'
