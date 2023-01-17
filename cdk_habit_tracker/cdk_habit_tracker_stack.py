@@ -152,7 +152,7 @@ class CdkHabitTrackerStack(Stack):
         lambda_target = targets.LambdaFunction(email_habit_survey_function_cdk)
 
         events.Rule(self, "ScheduleRule",
-            schedule=events.Schedule.cron(minute="0", hour="4"),
+            schedule=events.Schedule.cron(minute="0", hour="3"),
             targets=[lambda_target]
         )
 

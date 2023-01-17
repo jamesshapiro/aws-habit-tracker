@@ -10,7 +10,7 @@ ddb_client = boto3.client('dynamodb')
 def grab_data(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
-    return [(elem.attrs['data-date'], elem.attrs['data-count']) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if 'data-count' in elem.attrs]
+    return [(elem.attrs['data-date'], elem.attrs['data-level']) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)]
 
 def lambda_handler(event, context):
     #print(f'{event=}')
