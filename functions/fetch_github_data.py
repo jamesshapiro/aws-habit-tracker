@@ -3,14 +3,21 @@ import json
 import boto3
 import requests
 from bs4 import BeautifulSoup
+import re
 
 table_name = os.environ['DDB_TABLE']
 ddb_client = boto3.client('dynamodb')
 
+def get_contribs(text):
+    match = re.search(r'(\d+) contribution', text)
+    if match:
+        return int(match.group(1))
+    return 0
+
 def grab_data(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
-    return [(elem.attrs['data-date'], elem.attrs['data-level']) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)]
+    return [(elem.attrs['data-date'], get_contribs(elem.text)) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)]
 
 def lambda_handler(event, context):
     #print(f'{event=}')
