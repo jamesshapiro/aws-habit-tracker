@@ -17,7 +17,12 @@ def get_contribs(text):
 def grab_data(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
-    return [(elem.attrs['data-date'], get_contribs(elem.text)) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)]
+    return [
+        (elem.attrs['data-date'], get_contribs(elem.find("span", class_="sr-only").text))
+        for elem in soup.find_all("td", class_="ContributionCalendar-day")
+        if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)
+    ]
+    #return [(elem.attrs['data-date'], get_contribs(elem.text)) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)]
 
 def lambda_handler(event, context):
     #print(f'{event=}')
