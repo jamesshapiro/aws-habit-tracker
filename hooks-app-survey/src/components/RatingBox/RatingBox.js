@@ -2,7 +2,7 @@ import React from 'react';
 
 const RATINGS = ['1', '2', '3', '4', '5'];
 
-const RatingBox = ({ id, category, onRatingChange }) => {
+const RatingBox = ({ id, category, onRatingChange, attemptedSubmit = undefined }) => {
   const [selectedRating, setSelectedRating] = React.useState(null);
 
   const handleSelect = (rating) => {
