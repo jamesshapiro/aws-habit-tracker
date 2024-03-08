@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import useSWR from 'swr';
+import SurveyItem from '../SurveyItem';
+
+const params = new Proxy(new URLSearchParams(window.location.search), {
+  get: (searchParams, prop) => searchParams.get(prop),
+})
+const token = params.token
+const ENDPOINT = process.env.REACT_APP_SURVEY_URL + `?token=${token}`
 
 async function fetcher(endpoint) {
   const response = await fetch(endpoint);
@@ -8,18 +15,35 @@ async function fetcher(endpoint) {
 }
 
 function Survey() {
-  const [habits, setHabits] = useState();
-  const params = new Proxy(new URLSearchParams(window.location.search), {
-    get: (searchParams, prop) => searchParams.get(prop),
-  })
-
-  const token = params.token
-  const ENDPOINT = process.env.REACT_APP_SURVEY_URL + `?token=${token}`
-  
-  console.log(ENDPOINT)
   const { data, isLoading } = useSWR(ENDPOINT, fetcher);
+  const [ratings, setRatings] = React.useState({});
+
+  const handleRatingChange = (index, newRating) => {
+    setRatings(prevRatings => ({
+      ...prevRatings,
+      [index]: newRating,
+    }));
+  };
+
   if (data) {
-    return <div>{data.map((habit) => <div>{habit.DISPLAY_NAME.S}</div>)}</div>;
+    return <div>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          console.log(ratings);
+        }}
+      >
+      {data.map((habit, index) => 
+        <SurveyItem 
+          key={index}
+          value={ratings[index] || ''}
+          onChange={(newRating) => handleRatingChange(index, newRating)}
+        >
+            {habit}
+        </SurveyItem>)}
+      <button type="submit">Submit</button>
+      </form>
+    </div>;
   }
 
   return <div>Loading...</div>;
