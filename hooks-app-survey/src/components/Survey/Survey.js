@@ -1,6 +1,7 @@
 import React from 'react';
 import useSWR from 'swr';
 import SurveyItem from '../SurveyItem';
+import RatingBox from '../RatingBox';
 
 const params = new Proxy(new URLSearchParams(window.location.search), {
   get: (searchParams, prop) => searchParams.get(prop),
@@ -18,10 +19,10 @@ function Survey() {
   const { data, isLoading } = useSWR(ENDPOINT, fetcher);
   const [ratings, setRatings] = React.useState({});
 
-  const handleRatingChange = (index, newRating) => {
+  const handleRatingChange = (id, newRating) => {
     setRatings(prevRatings => ({
       ...prevRatings,
-      [index]: newRating,
+      [id]: newRating,
     }));
   };
 
@@ -34,13 +35,14 @@ function Survey() {
         }}
       >
       {data.map((habit, index) => 
-        <SurveyItem 
+        <RatingBox 
           key={index}
-          value={ratings[index] || ''}
-          onChange={(newRating) => handleRatingChange(index, newRating)}
+          id={index}
+          category={habit.DISPLAY_NAME.S}
+          onRatingChange={handleRatingChange}
         >
             {habit}
-        </SurveyItem>)}
+        </RatingBox>)}
       <button type="submit">Submit</button>
       </form>
     </div>;
