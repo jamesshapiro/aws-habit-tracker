@@ -41,6 +41,7 @@ class CdkHabitTrackerStack(Stack):
             test_username=[line for line in lines if line.startswith('test_username=')][0].split('=')[1]
             test_password=[line for line in lines if line.startswith('test_password=')][0].split('=')[1]
             config_set_name=[line for line in lines if line.startswith('config_set_name=')][0].split('=')[1]
+        
         ddb_table = dynamodb.Table(
             self, 'Habits',
             partition_key=dynamodb.Attribute(name='PK1', type=dynamodb.AttributeType.STRING),

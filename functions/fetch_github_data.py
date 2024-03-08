@@ -18,9 +18,9 @@ def grab_data(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
     return [
-        (elem.attrs['data-date'], get_contribs(elem.find("span", class_="sr-only").text))
+        (elem.attrs.get('data-date', ''), int(elem.attrs.get('data-level', '0')))
         for elem in soup.find_all("td", class_="ContributionCalendar-day")
-        if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)
+        if (elem.attrs) and ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)
     ]
     #return [(elem.attrs['data-date'], get_contribs(elem.text)) for elem in soup.find_all("rect", class_="ContributionCalendar-day") if ('data-date' in elem.attrs) and ('data-level' in elem.attrs) and (int(elem.attrs['data-level']) > 0)]
 
@@ -46,6 +46,8 @@ def lambda_handler(event, context):
             }
         )
         for date, count in grab_data(url):
+            if not date:
+                continue
             response = ddb_client.put_item(
                 TableName=table_name,
                 Item={
