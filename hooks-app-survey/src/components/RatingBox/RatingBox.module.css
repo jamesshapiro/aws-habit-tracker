@@ -1,0 +1,83 @@
+/* RatingBox.module.css */
+.boxContainer {
+    display: flex;
+    padding: 1px;
+}
+
+.box {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 3px;
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease-in-out;
+}
+
+.unselected {
+    background-color: #f8f9fa;
+    /* Very light grey */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Soft shadow */
+}
+
+.selected {
+    background-color: #007ee5;
+    /* Dropbox blue */
+    color: #ffffff;
+    /* White text */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    /* More pronounced shadow */
+}
+
+.header {
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+    /* Increased weight for emphasis */
+    margin-bottom: 1px;
+    margin-top: 25px;
+    /* Reduced vertical space to rating options */
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /* Classier font styling */
+}
+
+.headerError {
+    color: #db3e00;
+    /* Alert red */
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(219, 62, 0, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(219, 62, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(219, 62, 0, 0);
+    }
+}
+
+.notificationBox {
+    margin-top: 5px;
+    background-color: #feefc3;
+    /* Soft yellow for notices */
+    color: #333;
+    /* Dark text for readability */
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    display: none;
+    border: 1px solid #fed7b0;
+    /* Light orange border */
+}
+
+.notificationBoxShow {
+    display: block;
+}

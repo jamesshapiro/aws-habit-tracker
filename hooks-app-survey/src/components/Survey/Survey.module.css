@@ -1,0 +1,26 @@
+.submitButton {
+    background-color: #0052cc;
+
+    color: #ffffff;
+    font-size: 18px;
+    padding: 10px 20px;
+
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+
+}
+
+.submitButton:hover {
+    background-color: #003ea0;
+}
+
+.surveyContainer {
+    margin-left: 55px;
+    margin-top: 20px;
+}

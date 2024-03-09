@@ -1,8 +1,9 @@
 import React from 'react';
+import styles from './RatingBox.module.css';
 
 const RATINGS = ['1', '2', '3', '4', '5'];
 
-const RatingBox = ({ id, category, onRatingChange, attemptedSubmit = undefined }) => {
+const RatingBox = ({ id, category, onRatingChange, attemptedSubmit }) => {
   const [selectedRating, setSelectedRating] = React.useState(null);
 
   const handleSelect = (rating) => {
@@ -12,27 +13,23 @@ const RatingBox = ({ id, category, onRatingChange, attemptedSubmit = undefined }
 
   return (
     <div>
-      <div>{category}</div>
-      <div style={{ display: 'flex' }}>
+      <div className={`${styles.header} ${attemptedSubmit && selectedRating === null ? styles.headerError : ''}`}>{category}</div>
+      <div className={styles.boxContainer}>
         {RATINGS.map((rating) => (
           <div
             key={rating}
             onClick={() => handleSelect(rating)}
-            style={{
-              width: '50px',
-              height: '50px',
-              backgroundColor: selectedRating === rating ? 'darkgrey' : 'lightgrey',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '5px',
-              cursor: 'pointer',
-            }}
+            className={`${styles.box} ${selectedRating === rating ? styles.selected : styles.unselected}`}
           >
             {rating}
           </div>
         ))}
       </div>
+      {attemptedSubmit && selectedRating === null && (
+        <div className={`${styles.notificationBox} ${styles.notificationBoxShow}`}>
+          Please select a rating.
+        </div>
+      )}
     </div>
   );
 };
