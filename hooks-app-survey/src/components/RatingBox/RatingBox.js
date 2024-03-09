@@ -13,7 +13,7 @@ const RatingBox = ({ id, category, onRatingChange, attemptedSubmit }) => {
 
   return (
     <div>
-      <div className={`${styles.header} ${attemptedSubmit && selectedRating === null ? styles.headerError : ''}`}>{category}</div>
+      <div className={`${styles.header} ${attemptedSubmit && selectedRating === null ? styles.headerError : ''}`}>{id+1}. {category}</div>
       <div className={styles.boxContainer}>
         {RATINGS.map((rating) => (
           <div

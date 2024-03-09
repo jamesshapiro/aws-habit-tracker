@@ -16,6 +16,10 @@ const params = new Proxy(new URLSearchParams(window.location.search), {
 })
 const token = params.token
 const ENDPOINT = process.env.REACT_APP_SURVEY_URL + `?token=${token}`
+let date_string = params.date_string
+const dd = date_string.slice(-2)
+const mm = date_string.slice(5, 7)
+const yyyy = date_string.slice(0, 4)
 
 async function fetcher(endpoint) {
   const response = await fetch(endpoint);
@@ -46,6 +50,7 @@ function Survey() {
   };
 
   if (data) {
+    console.log(data)
     return <div className={styles.surveyContainer}>
       <form
         onSubmit={(event) => {
@@ -53,7 +58,10 @@ function Survey() {
           console.log(ratings);
         }}
       >
-      {data.map((habit, index) => 
+      <div
+        className={styles.header}
+      >Rate your tenacity on {mm}-{dd}-{yyyy} (1 = Awful, 5 = Great)</div>
+      {data.slice(1).map((habit, index) => 
         <RatingBox 
           key={index}
           id={index}
