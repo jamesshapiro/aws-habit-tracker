@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './RatingBox.module.css';
+import * as style from './RatingBox.module.css';
 
 const RATINGS = ['1', '2', '3', '4', '5'];
 
@@ -13,20 +13,21 @@ const RatingBox = ({ id, category, onRatingChange, attemptedSubmit }) => {
 
   return (
     <div>
-      <div className={`${styles.header} ${attemptedSubmit && selectedRating === null ? styles.headerError : ''}`}>{id+1}. {category}</div>
-      <div className={styles.boxContainer}>
+      {/* <div className={`${styles.header} ${attemptedSubmit && selectedRating === null ? styles.headerError : ''}`}>{id+1}. {category}</div> */}
+      <div className={`${style.header} ${attemptedSubmit && selectedRating === null ? style.headerError : ''}`}>{id+1}. {category}</div>
+      <div className={style.boxContainer}>
         {RATINGS.map((rating) => (
           <div
             key={rating}
             onClick={() => handleSelect(rating)}
-            className={`${styles.box} ${selectedRating === rating ? styles.selected : styles.unselected}`}
+            className={`${style.box} ${selectedRating === rating ? style.selected : style.unselected}`}
           >
             {rating}
           </div>
         ))}
       </div>
       {attemptedSubmit && selectedRating === null && (
-        <div className={`${styles.notificationBox} ${styles.notificationBoxShow}`}>
+        <div className={`${style.notificationBox} ${style.notificationBoxShow}`}>
           Please select a rating.
         </div>
       )}
